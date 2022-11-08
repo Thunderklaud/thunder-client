@@ -7,15 +7,17 @@ from services.login import isLoggedIn, createLocalAppPathIfNotExists, saveJWTLoc
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
+    # prepare local app path
     createLocalAppPathIfNotExists()
 
+    # get login state
     loggedIn = isLoggedIn()
 
     # init UIManager
     uimanager = UIManager()
     widget = uimanager.createUI(loggedIn)
 
-    # start background worker when user is still logged in
+    # start background worker when user is logged in on startup
     if loggedIn:
         worker = Worker()
         worker.start()
