@@ -1,5 +1,6 @@
 import sys
 from PySide6 import QtCore, QtWidgets, QtGui
+from ui.settingsui import SettingsUI
 
 
 class LoginUI(QtWidgets.QWidget):
@@ -40,3 +41,7 @@ class LoginUI(QtWidgets.QWidget):
     def login(self):
         # TODO: do server authentication here
         self.loginFeedback.setText("You're now logged in...")
+
+        # TODO: save JWT to local machine
+
+        # TODO: Open Settings page
