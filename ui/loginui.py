@@ -1,6 +1,8 @@
 import sys
 from PySide6 import QtCore, QtWidgets, QtGui
-from ui.settingsui import SettingsUI
+import requests
+from services.login import login, register
+
 
 
 class LoginUI(QtWidgets.QWidget):
@@ -16,18 +18,21 @@ class LoginUI(QtWidgets.QWidget):
 
         self.loginFeedback = QtWidgets.QLabel("")
 
-        self.serverURLInput = QtWidgets.QLineEdit()
+        self.serverURLInput = QtWidgets.QLineEdit("Hallo")
         self.serverURLInput.setPlaceholderText("Server URL")
 
-        self.usernameInput = QtWidgets.QLineEdit()
+        self.usernameInput = QtWidgets.QLineEdit("@") #TestData
         self.usernameInput.setPlaceholderText("Username")
 
-        self.passwordInput = QtWidgets.QLineEdit()
+        self.passwordInput = QtWidgets.QLineEdit("0") #TestData
         self.passwordInput.setPlaceholderText("Password")
 
         self.loginButton = QtWidgets.QPushButton("Login")
-        self.loginButton.clicked.connect(self.login)
+        self.loginButton.clicked.connect(self.clickedLogin)
         # self.loginButton.setStyleSheet('background-color:red;')
+
+        self.registerButton = QtWidgets.QPushButton("Register")
+        self.registerButton.clicked.connect(self.clickedRegister)
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.topLayout = QtWidgets.QVBoxLayout()
@@ -37,9 +42,17 @@ class LoginUI(QtWidgets.QWidget):
         self.layout.addWidget(self.usernameInput)
         self.layout.addWidget(self.passwordInput)
         self.layout.addWidget(self.loginButton)
+        self.layout.addWidget(self.registerButton)
 
-    def login(self):
-        # TODO: do server authentication here
+    def clickedRegister(self):
+        register("m", "w", "@", "0")
+
+    def clickedLogin(self):
+        mail = self.usernameInput.text()
+        pw = self.passwordInput.text()
+        print("mail: "+ mail)
+        print("pw: " + pw)
+        login(mail, pw )
         self.loginFeedback.setText("You're now logged in...")
 
         # TODO: save JWT to local machine

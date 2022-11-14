@@ -2,13 +2,15 @@ import sys
 from ui.manager import UIManager
 from services.worker import Worker
 from PySide6 import QtWidgets
-from services.login import isLoggedIn, createLocalAppPathIfNotExists, saveJWTLocally
+from services.login import isLoggedIn
+from services.localappmanager import LocalAppManager
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
     # prepare local app path
-    createLocalAppPathIfNotExists()
+    # localAppManager = LocalAppManager()
+    LocalAppManager.createLocalAppPathIfNotExists()
 
     # get login state
     loggedIn = isLoggedIn()

@@ -9,14 +9,14 @@ class UIManager(QtWidgets.QWidget):
 
     def createUI(self, loggedIn):
         if loggedIn:
-            widget = LoginUI()
-            widget.resize(250, 250)
-            widget.show()
-            widget.setWindowTitle("Thunderklaud")
-        else:
             widget = SettingsUI()
             widget.resize(500, 500)
             widget.show()
             widget.setWindowTitle("Thunderklaud Settings")
+        else:
+            widget = LoginUI()
+            widget.resize(250, 250)
+            widget.show()
+            widget.setWindowTitle("Thunderklaud")
 
         return widget
