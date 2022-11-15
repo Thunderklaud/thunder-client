@@ -10,7 +10,7 @@ class UIManager(QtWidgets.QWidget):
     def createUI(self, loggedIn):
         if loggedIn:
             widget = SettingsUI()
-            widget.resize(500, 500)
+            widget.resize(350, 400)
             widget.show()
             widget.setWindowTitle("Thunderklaud Settings")
         else:
