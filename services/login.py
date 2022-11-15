@@ -4,7 +4,7 @@ import os
 
 def isLoggedIn():
     # TODO: Check if local JWT is valid
-    return True
+    return False
 
 
 def getLocalAppPath():
