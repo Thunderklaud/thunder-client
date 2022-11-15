@@ -1,8 +1,8 @@
 from pathlib import Path
 import os
 
-class LocalAppManager():
 
+class LocalAppManager():
 
     @staticmethod
     def getLocalAppPath():
@@ -30,5 +30,8 @@ class LocalAppManager():
     @staticmethod
     def readLocalJWT():
         localJWTPath = LocalAppManager.getLocalJWTPath()
+        if not os.path.exists(localJWTPath):
+            return ""
+
         jwtFile = open(localJWTPath, "r")
         return jwtFile.read()
