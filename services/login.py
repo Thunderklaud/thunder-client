@@ -1,26 +1,26 @@
 from pathlib import Path
 import os
+import requests
+from services.localappmanager import LocalAppManager
 
 
 def isLoggedIn():
-    # TODO: Check if local JWT is valid
-    return False
+    jwt = LocalAppManager.readLocalJWT() 
+    headers = {"Authorization": "Bearer {}".format(jwt)}
+    response = requests.get("http://localhost:8080/v1/user/test", headers=headers)
+    return response.status_code == 200
 
 
-def getLocalAppPath():
-    home = str(Path.home())
-    appDir = "/.thunderklaud/"
-    return home + appDir
+def register(firstname, lastname, email, pw_hash):
+    registerData = {"firstname":firstname, "lastname": lastname, "email": email, "pw_hash": pw_hash}
+    r = requests.post("http://localhost:8080/v1/user/registration", json = registerData)
+    print(r.json())
 
+def login(email, pw_hash):
+    loginData = {"email": email,"pw_hash": pw_hash}
+    response = requests.post("http://localhost:8080/v1/user/login", json = loginData)
+    # ToDo ErrorHandling
+    print(response.json())
+    jwt = response.json()["result"]["jwt"]
+    LocalAppManager.saveJWTLocally(jwt)
 
-def createLocalAppPathIfNotExists():
-    localAppPath = getLocalAppPath()
-    if not os.path.isdir(localAppPath):
-        os.makedirs(localAppPath)
-
-
-def saveJWTLocally(jwt):
-    localJWTPath = getLocalAppPath() + "jwt"
-
-    with open(localJWTPath, 'w') as f:
-        f.write(jwt)
