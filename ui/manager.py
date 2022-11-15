@@ -15,7 +15,7 @@ class UIManager(QtWidgets.QWidget):
             widget.setWindowTitle("Thunderklaud")
         else:
             widget = SettingsUI()
-            widget.resize(500, 500)
+            widget.resize(350, 400)
             widget.show()
             widget.setWindowTitle("Thunderklaud Settings")
 
