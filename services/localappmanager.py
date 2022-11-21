@@ -35,3 +35,7 @@ class LocalAppManager():
 
         jwtFile = open(localJWTPath, "r")
         return jwtFile.read()
+
+    def getSetting(name):
+        if name == "server_url":
+            return "http://localhost:8080/"
