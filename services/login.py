@@ -1,4 +1,3 @@
-
 import requests
 from services.localappmanager import LocalAppManager
 

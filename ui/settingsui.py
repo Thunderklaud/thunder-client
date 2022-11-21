@@ -11,7 +11,6 @@ class SettingsUI(QtWidgets.QWidget):
         super().__init__()
 
         self.openLoginScreen = openLoginScreen
-
         self.createLayouts()
         self.createTopBar()
         self.createMainContent()
@@ -107,7 +106,6 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-
         aboutLine2 = QtWidgets.QLabel("Version 1.0.0")
         self.aboutBoxLayout.addWidget(aboutLine2)
 

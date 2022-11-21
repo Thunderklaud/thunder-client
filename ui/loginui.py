@@ -55,3 +55,7 @@ class LoginUI(QtWidgets.QWidget):
         print("pw: " + pw)
         login(mail, pw, self.openSettingsScreen)
         self.loginFeedback.setText("You're now logged in...")
+
+        # TODO: save JWT to local machine
+
+        # TODO: Open Settings page
