@@ -8,15 +8,26 @@ class UIManager(QtWidgets.QWidget):
         super().__init__()
 
     def createUI(self, loggedIn):
-        if loggedIn:
-            widget = SettingsUI()
-            widget.resize(350, 400)
-            widget.show()
-            widget.setWindowTitle("Thunderklaud Settings")
-        else:
-            widget = LoginUI()
-            widget.resize(250, 250)
-            widget.show()
-            widget.setWindowTitle("Thunderklaud")
+        self.widget = QtWidgets.QStackedWidget()
 
-        return widget
+        self.widget.addWidget(SettingsUI(self.openLoginScreen))
+        self.widget.addWidget(LoginUI(self.openSettingsScreen))
+
+        if loggedIn:
+            self.openSettingsScreen()
+        else:
+            self.openLoginScreen()
+
+        return self.widget
+
+    def openLoginScreen(self):
+        self.widget.setCurrentIndex(1)
+        self.widget.resize(250, 250)
+        self.widget.show()
+        self.widget.setWindowTitle("Thunderklaud")
+
+    def openSettingsScreen(self):
+        self.widget.setCurrentIndex(0)
+        self.widget.resize(350, 400)
+        self.widget.show()
+        self.widget.setWindowTitle("Thunderklaud Settings")

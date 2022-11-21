@@ -2,12 +2,15 @@ import sys
 from PySide6 import QtCore, QtWidgets, QtGui
 from services.worker import Worker
 from services.serversettings import ServerSettings
+from services.login import logout
 
 
 class SettingsUI(QtWidgets.QWidget):
 
-    def __init__(self):
+    def __init__(self, openLoginScreen):
         super().__init__()
+
+        self.openLoginScreen = openLoginScreen
 
         self.createLayouts()
         self.createTopBar()
@@ -18,7 +21,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.topBarLayout = QtWidgets.QHBoxLayout()
         self.topBarLayout.setAlignment(QtCore.Qt.AlignTop)
         self.contentLayout = QtWidgets.QVBoxLayout()
-        self.bottomBarLayout = QtWidgets.QHBoxLayout()
+        self.bottomBarLayout = QtWidgets.QVBoxLayout()
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.layout.addLayout(self.topBarLayout)
@@ -137,4 +140,21 @@ class SettingsUI(QtWidgets.QWidget):
 
     def createLogoutButton(self):
         logoutButton = QtWidgets.QPushButton("Logout")
+        logoutButton.clicked.connect(self.clickedLogout)
         self.topBarLayout.addWidget(logoutButton)
+
+    def clickedLogout(self):
+        if logout(self.openLoginScreen):
+            self.showNotification("Successfully logged out!")
+        else:
+            self.showNotification("Error: Logout not possible!")
+
+    def showNotification(self, text):
+        # remove old notifcation if exists
+        oldNotification = self.bottomBarLayout.itemAt(1)
+        if oldNotification is not None:
+            oldNotification.widget().setParent(None)
+
+        # add new notification
+        notification = QtWidgets.QLabel(text)
+        self.bottomBarLayout.addWidget(notification)

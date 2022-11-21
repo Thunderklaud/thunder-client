@@ -4,10 +4,11 @@ import requests
 from services.login import login, register
 
 
-
 class LoginUI(QtWidgets.QWidget):
-    def __init__(self):
+    def __init__(self, openSettingsScreen):
         super().__init__()
+
+        self.openSettingsScreen = openSettingsScreen
 
         self.text = QtWidgets.QLabel("Log in to your Thunderklaud")
         font = self.text.font()
@@ -21,10 +22,10 @@ class LoginUI(QtWidgets.QWidget):
         self.serverURLInput = QtWidgets.QLineEdit("Hallo")
         self.serverURLInput.setPlaceholderText("Server URL")
 
-        self.usernameInput = QtWidgets.QLineEdit("@") #TestData
+        self.usernameInput = QtWidgets.QLineEdit("@")  # TestData
         self.usernameInput.setPlaceholderText("Username")
 
-        self.passwordInput = QtWidgets.QLineEdit("0") #TestData
+        self.passwordInput = QtWidgets.QLineEdit("0")  # TestData
         self.passwordInput.setPlaceholderText("Password")
 
         self.loginButton = QtWidgets.QPushButton("Login")
@@ -50,11 +51,7 @@ class LoginUI(QtWidgets.QWidget):
     def clickedLogin(self):
         mail = self.usernameInput.text()
         pw = self.passwordInput.text()
-        print("mail: "+ mail)
+        print("mail: " + mail)
         print("pw: " + pw)
-        login(mail, pw )
+        login(mail, pw, self.openSettingsScreen)
         self.loginFeedback.setText("You're now logged in...")
-
-        # TODO: save JWT to local machine
-
-        # TODO: Open Settings page
