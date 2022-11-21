@@ -2,4 +2,4 @@
 
 ## Building
 
-Run `pyinstaller -F --noconsole main.py` to create a standalone .exe file
+Run `pyinstaller -F --noconsole main.py` to create a standalone application file (based on the current OS)
