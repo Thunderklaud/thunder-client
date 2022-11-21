@@ -42,14 +42,14 @@ jobs:
           - os: macos-latest
             TARGET: macos
             CMD_BUILD: >
-              pyinstaller -F -w -n thunder-client cli.py &&
+              pyinstaller --noconsole -F -w -n thunder-client main.py &&
               cd dist/ &&
               zip -r9 thunder-client thunder-client.app/
             OUT_FILE_NAME: thunder-client.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             TARGET: windows
-            CMD_BUILD: pyinstaller -F -w -n thunder-client cli.py
+            CMD_BUILD: pyinstaller --noconsole -F -w -n thunder-client main.py
             OUT_FILE_NAME: thunder-client.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
