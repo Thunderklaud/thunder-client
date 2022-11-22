@@ -12,17 +12,17 @@ def isLoggedIn():
 
 
 def register(firstname, lastname, email, password):
-    pw_hash = hashPassword(password)
+    pwHash = hashPassword(password)
     registerData = {"firstname": firstname,
-                    "lastname": lastname, "email": email, "pw_hash": pw_hash}
+                    "lastname": lastname, "email": email, "pw_hash": pwHash}
     r = requests.post(
         "http://localhost:8080/v1/user/registration", json=registerData)
     print(r.json())
 
 
 def login(email, password, openSetingsScreen):
-    pw_hash = hashPassword(password)
-    loginData = {"email": email, "pw_hash": pw_hash}
+    pwHash = hashPassword(password)
+    loginData = {"email": email, "pw_hash": pwHash}
     response = requests.post(
         "http://localhost:8080/v1/user/login", json=loginData)
     # ToDo ErrorHandling
