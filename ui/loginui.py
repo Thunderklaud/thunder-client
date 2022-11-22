@@ -46,16 +46,13 @@ class LoginUI(QtWidgets.QWidget):
         self.layout.addWidget(self.registerButton)
 
     def clickedRegister(self):
-        register("m", "w", "@", "0")
+        username = self.usernameInput.text()
+        password = self.passwordInput.text()
+        #"M" and "W" just DummyData
+        register("M", "w", username, password)
 
     def clickedLogin(self):
         mail = self.usernameInput.text()
         pw = self.passwordInput.text()
-        print("mail: " + mail)
-        print("pw: " + pw)
         login(mail, pw, self.openSettingsScreen)
         self.loginFeedback.setText("You're now logged in...")
-
-        # TODO: save JWT to local machine
-
-        # TODO: Open Settings page
