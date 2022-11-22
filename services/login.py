@@ -25,11 +25,17 @@ def login(email, password, openSetingsScreen):
     loginData = {"email": email, "pw_hash": pwHash}
     response = requests.post(
         "http://localhost:8080/v1/user/login", json=loginData)
-    # ToDo ErrorHandling
+
+    jsonResponse = response.json()
+    if jsonResponse["status"] == False:
+        return "Login failed: " + str(jsonResponse["error"])
+
     print(response.json())
     jwt = response.json()["result"]["jwt"]
     LocalAppManager.saveJWTLocally(jwt)
     openSetingsScreen()
+
+    
 
 
 def logout(openLoginScreen):

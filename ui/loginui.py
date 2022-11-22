@@ -54,5 +54,5 @@ class LoginUI(QtWidgets.QWidget):
     def clickedLogin(self):
         mail = self.usernameInput.text()
         pw = self.passwordInput.text()
-        login(mail, pw, self.openSettingsScreen)
-        self.loginFeedback.setText("You're now logged in...")
+        loginFeedbackText = login(mail, pw, self.openSettingsScreen)
+        self.loginFeedback.setText(loginFeedbackText)
