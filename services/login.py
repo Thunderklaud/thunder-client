@@ -1,4 +1,5 @@
 import requests
+from hashlib import sha256 
 from services.localappmanager import LocalAppManager
 
 
@@ -10,7 +11,8 @@ def isLoggedIn():
     return response.status_code == 200
 
 
-def register(firstname, lastname, email, pw_hash):
+def register(firstname, lastname, email, password):
+    pw_hash = hashPassword(password)
     registerData = {"firstname": firstname,
                     "lastname": lastname, "email": email, "pw_hash": pw_hash}
     r = requests.post(
@@ -18,7 +20,8 @@ def register(firstname, lastname, email, pw_hash):
     print(r.json())
 
 
-def login(email, pw_hash, openSetingsScreen):
+def login(email, password, openSetingsScreen):
+    pw_hash = hashPassword(password)
     loginData = {"email": email, "pw_hash": pw_hash}
     response = requests.post(
         "http://localhost:8080/v1/user/login", json=loginData)
@@ -40,3 +43,7 @@ def logout(openLoginScreen):
         return True
 
     return False
+
+def hashPassword(string):
+    return str(sha256(string.encode('utf-8')).hexdigest())
+    
