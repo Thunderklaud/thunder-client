@@ -45,37 +45,7 @@ class SettingsUI(QtWidgets.QWidget):
         syncFoldersBox = QtWidgets.QGroupBox("Sync Folders")
         self.syncFoldersLayout = QtWidgets.QVBoxLayout()
 
-        # syncFolders = ServerSettings.getSyncFolders()
-        syncFolders = [
-            {
-                "id": {
-                    "$oid": "636e7c5ff0feb145084ab214"
-                },
-                "name": "Documents",
-                "children": [
-                    {
-                        "id": {
-                            "$oid": "636e7c5ff0feb145084ab214"
-                        },
-                        "name": "Sub Docs 1",
-                        "children": [
-                            {
-                                "id": {
-                                    "$oid": "636e7c5ff0feb145084ab214"
-                                },
-                                "name": "Sub Sub Docs 1",
-                            },
-                        ]
-                    },
-                    {
-                        "id": {
-                            "$oid": "636e7c5ff0feb145084ab214"
-                        },
-                        "name": "Sub Docs 2",
-                    }
-                ]
-            }
-        ]
+        syncFolders = ServerSettings.getSyncFolders()
         self.addSyncFolderRecursive(syncFolders)
 
         syncFoldersBox.setLayout(self.syncFoldersLayout)
