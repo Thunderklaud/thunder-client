@@ -41,8 +41,7 @@ class ServerSettings():
             return []
 
         jsonResponse = response.json()
-        jsonResult = jsonResponse["result"]
-        dirs = jsonResult["dirs"]
+        dirs = jsonResponse["dirs"]
 
         for dir in dirs:
             folder = {}
