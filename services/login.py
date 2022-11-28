@@ -1,5 +1,5 @@
 import requests
-from hashlib import sha256 
+from hashlib import sha256
 from services.localappmanager import LocalAppManager
 
 
@@ -17,7 +17,6 @@ def register(firstname, lastname, email, password):
                     "lastname": lastname, "email": email, "pw_hash": pwHash}
     r = requests.post(
         "http://localhost:8080/v1/user/registration", json=registerData)
-    print(r.json())
 
 
 def login(email, password, openSetingsScreen):
@@ -26,16 +25,12 @@ def login(email, password, openSetingsScreen):
     response = requests.post(
         "http://localhost:8080/v1/user/login", json=loginData)
 
-    jsonResponse = response.json()
-    if jsonResponse["status"] == False:
-        return "Login failed: " + str(jsonResponse["error"])
+    if response.status_code != 200:
+        return "Login failed: " + response.text
 
-    print(response.json())
-    jwt = response.json()["result"]["jwt"]
+    jwt = response.json()["jwt"]
     LocalAppManager.saveJWTLocally(jwt)
     openSetingsScreen()
-
-    
 
 
 def logout(openLoginScreen):
@@ -50,6 +45,6 @@ def logout(openLoginScreen):
 
     return False
 
+
 def hashPassword(string):
     return str(sha256(string.encode('utf-8')).hexdigest())
-    
