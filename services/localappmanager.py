@@ -39,6 +39,8 @@ class LocalAppManager():
     def getSetting(name):
         if name == "server_url":
             return "http://localhost:8080/"
+        if name == "local_sync_folder_path":
+            return "./test/client/"
 
     def removeJWTLocally():
         localJWTPath = LocalAppManager.getLocalJWTPath()

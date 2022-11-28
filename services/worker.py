@@ -1,42 +1,30 @@
 import os
 from services.localappmanager import LocalAppManager
-import requests 
+import requests
 from config import Config
 
 
 class Worker:
 
-    localSyncFolderPath = "./test/client"
-
     def start(self):
-        # print("start worker")
-        syncFolderPath = self.getSyncFolderPath()
+        self.syncFolderPath = LocalAppManager.getSetting(
+            "local_sync_folder_path")
 
         # create sync folder if not exists
-        if not os.path.isdir(syncFolderPath):
-            os.makedirs(syncFolderPath)
+        if not os.path.isdir(self.syncFolderPath):
+            os.makedirs(self.syncFolderPath)
 
-        folders = Worker.__getFolderRecursive();
-        print(folders)
-
-
-    @staticmethod
-    def getSyncFolderPath():
-        return Worker.localSyncFolderPath
+        # create local folders
+        Worker.__createFolderRecursive(self)
 
     @staticmethod
-    def setLocalSyncFolderPath(path):
-        Worker.localSyncFolderPath = path
-
-
-    @staticmethod
-    def __getFolderRecursive(parent_id=None, path=None):
+    def __createFolderRecursive(self, parent_id=None, path=""):
         result = []
 
         jwt = LocalAppManager.readLocalJWT()
         headers = {"Content-Type": "application/json",
                    "Authorization": "Bearer {}".format(jwt)}
-        requestURL = LocalAppManager.getSetting(
+        request_url = LocalAppManager.getSetting(
             "server_url") + Config.API_VERSION + "/data/directory"
 
         # build request data
@@ -45,10 +33,10 @@ class Worker:
         else:
             data = '{}'
 
-        response = requests.get(url=requestURL, data=data, headers=headers)
+        response = requests.get(url=request_url, data=data, headers=headers)
 
         # DEBUG
-        print("request" + data)
+        # print("request" + data)
         # END DEBUG
 
         if response.status_code != 200:
@@ -63,19 +51,15 @@ class Worker:
             folderName = dir["name"]
 
             # create local folder
-            
-            if path is None:
-                path = ""
-
-            folderPath = Worker.getSyncFolderPath() + "/" + path + "/" + folderName
-            print(folderPath)
+            folderPath = self.syncFolderPath + "/" + path + "/" + folderName
             if not os.path.isdir(folderPath):
                 os.makedirs(folderPath)
 
-            childPath = path + "/" + folderName 
+            childPath = path + "/" + folderName
             folder["id"] = folderID
             folder["name"] = folderName
-            folder["children"] = Worker.__getFolderRecursive(folderID, childPath)
+            folder["children"] = Worker.__createFolderRecursive(self,
+                                                                folderID, childPath)
 
             result.append(folder)
 

@@ -2,6 +2,7 @@ import sys
 from PySide6 import QtCore, QtWidgets, QtGui
 from services.worker import Worker
 from services.serversettings import ServerSettings
+from services.localappmanager import LocalAppManager
 from services.login import logout
 
 
@@ -96,7 +97,7 @@ class SettingsUI(QtWidgets.QWidget):
         syncFolderPathLabel = QtWidgets.QLabel("Local Sync Folder")
         rowLayout.addWidget(syncFolderPathLabel)
 
-        syncFolderPath = Worker.getSyncFolderPath()
+        syncFolderPath = LocalAppManager.getSetting("local_sync_folder_path")
         localSynyPathInput = QtWidgets.QLineEdit(syncFolderPath)
         rowLayout.addWidget(localSynyPathInput)
 

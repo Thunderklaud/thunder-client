@@ -1,6 +1,8 @@
 import sys
+from threading import Thread
 from ui.manager import UIManager
 from services.worker import Worker
+from services.foldersyncer import FolderSyncer
 from PySide6 import QtWidgets
 from services.login import isLoggedIn
 from services.localappmanager import LocalAppManager
@@ -8,8 +10,12 @@ from services.localappmanager import LocalAppManager
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
+    if False:
+        folder_syncer = FolderSyncer()
+        folder_syncer.run()
+        sys.exit()
+
     # prepare local app path
-    # localAppManager = LocalAppManager()
     LocalAppManager.createLocalAppPathIfNotExists()
 
     # get login state
