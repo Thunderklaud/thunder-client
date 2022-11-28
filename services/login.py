@@ -25,7 +25,7 @@ def login(email, password, openSetingsScreen):
     response = requests.post(
         "http://localhost:8080/v1/user/login", json=loginData)
 
-    jsonResponse = response.json()
+
     if response.status_code != 200:
         return "Login failed: " + response.text
 
