@@ -10,8 +10,6 @@ class ServerSettings():
 
         folders = ServerSettings.__getFolderRecursive(
             None, "", multidimensional_array)
-        # print(folders)
-        # print("END")
         return folders
 
     @staticmethod

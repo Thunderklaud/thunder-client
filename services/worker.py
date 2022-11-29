@@ -4,19 +4,19 @@ from glob import iglob
 from services.localappmanager import LocalAppManager
 import requests
 from config import Config
+from utils.folder import uniqieFolderPath, remoteFolderExists, removeBaseURL
+from utils.request import getRequestURL, getRequestHeaders
 
 
 class Worker:
 
     def start(self):
-        print("starting background service worker...")
-
-        self.syncFolderPath = LocalAppManager.getSetting(
+        self.sync_folder_paths = LocalAppManager.getSetting(
             "local_sync_folder_path")
 
         # create sync folder if not exists
-        if not os.path.isdir(self.syncFolderPath):
-            os.makedirs(self.syncFolderPath)
+        if not os.path.isdir(self.sync_folder_paths):
+            os.makedirs(self.sync_folder_paths)
 
         # create local folders
         self.remoteFolders = Worker.__createFolderRecursive(self)
@@ -28,27 +28,19 @@ class Worker:
     def __createFolderRecursive(self, parent_id=None, path=""):
         result = []
 
-        jwt = LocalAppManager.readLocalJWT()
-        headers = {"Content-Type": "application/json",
-                   "Authorization": "Bearer {}".format(jwt)}
-        request_url = LocalAppManager.getSetting(
-            "server_url") + Config.API_VERSION + "/data/directory"
-
         # build request data
         if parent_id is not None:
             data = '{"id": "' + str(parent_id) + '"}'
         else:
             data = '{}'
 
+        # do server request
+        request_url = getRequestURL("/data/directory")
+        headers = getRequestHeaders()
         response = requests.get(url=request_url, data=data, headers=headers)
-
-        # DEBUG
-        # print("request" + data)
-        # END DEBUG
 
         if response.status_code != 200:
             return []
-
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
 
@@ -58,15 +50,15 @@ class Worker:
             folderName = dir["name"]
 
             # create local folder
-            folderPath = self.syncFolderPath + "/" + path + "/" + folderName
+            folderPath = self.sync_folder_paths + "/" + path + "/" + folderName
+            folderPath = uniqieFolderPath(folderPath)
             if not os.path.isdir(folderPath):
                 os.makedirs(folderPath)
 
-            childPath = path + "/" + folderName
+            childPath = uniqieFolderPath(path + "/" + folderName)
             folder["id"] = folderID
             folder["name"] = folderName
-            folder["path"] = path + "/" + folderName
-
+            folder["path"] = childPath
             result += Worker.__createFolderRecursive(self,
                                                      folderID, childPath)
 
@@ -76,40 +68,22 @@ class Worker:
 
     @staticmethod
     def __deleteFoldersNotOnServer(self):
-        for path in iglob(self.syncFolderPath + '/**/**', recursive=True):
+        for path in iglob(self.sync_folder_paths + '/**/**', recursive=True):
             # unique paths
-            path = path.replace("\\", "/")
+            path = uniqieFolderPath(path)
 
             # delete folder id it does not exists on server
             if os.path.isdir(path):
 
-                # remove base URL for comparation
-                localPathLength = len(
-                    LocalAppManager.getSetting("local_sync_folder_path")) - 1  # -1 to hold the slash at the beginning
-                pathLength = len(path)
-                path = path[localPathLength:pathLength]
+                path = removeBaseURL(path)
 
                 # don't delete root path
                 if path != "/" and path != "":
 
-                    # remove slash at the end
-                    path = path.rstrip("/")
-
-                    if not Worker.__remoteFolderExists(self, path):
-                        # remove slash at the beginning
-                        path = path.lstrip("/")
+                    if not remoteFolderExists(self.remoteFolders, path):
 
                         # delete folder
-                        fullPath = self.syncFolderPath + path
+                        fullPath = uniqieFolderPath(
+                            self.sync_folder_paths + path)
                         if os.path.isdir(fullPath):
                             shutil.rmtree(fullPath)
-                            print("deleted " + fullPath +
-                                  " (does not exists on the server)")
-
-    @staticmethod
-    def __remoteFolderExists(self, path):
-        for folder in self.remoteFolders:
-            if "path" in folder and folder["path"] == path:
-                return True
-
-        return False
