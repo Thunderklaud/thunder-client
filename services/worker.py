@@ -1,4 +1,6 @@
+import shutil
 import os
+from glob import iglob
 from services.localappmanager import LocalAppManager
 import requests
 from config import Config
@@ -17,7 +19,10 @@ class Worker:
             os.makedirs(self.syncFolderPath)
 
         # create local folders
-        Worker.__createFolderRecursive(self)
+        self.remoteFolders = Worker.__createFolderRecursive(self)
+
+        # delete local folders that does not exists on the server
+        Worker.__deleteFoldersNotOnServer(self)
 
     @staticmethod
     def __createFolderRecursive(self, parent_id=None, path=""):
@@ -60,8 +65,10 @@ class Worker:
             childPath = path + "/" + folderName
             folder["id"] = folderID
             folder["name"] = folderName
-            folder["children"] = Worker.__createFolderRecursive(self,
-                                                                folderID, childPath)
+            folder["path"] = path + "/" + folderName
+
+            result += Worker.__createFolderRecursive(self,
+                                                     folderID, childPath)
 
             result.append(folder)
 
@@ -69,3 +76,40 @@ class Worker:
 
     @staticmethod
     def __deleteFoldersNotOnServer(self):
+        for path in iglob(self.syncFolderPath + '/**/**', recursive=True):
+            # unique paths
+            path = path.replace("\\", "/")
+
+            # delete folder id it does not exists on server
+            if os.path.isdir(path):
+
+                # remove base URL for comparation
+                localPathLength = len(
+                    LocalAppManager.getSetting("local_sync_folder_path")) - 1  # -1 to hold the slash at the beginning
+                pathLength = len(path)
+                path = path[localPathLength:pathLength]
+
+                # don't delete root path
+                if path != "/" and path != "":
+
+                    # remove slash at the end
+                    path = path.rstrip("/")
+
+                    if not Worker.__remoteFolderExists(self, path):
+                        # remove slash at the beginning
+                        path = path.lstrip("/")
+
+                        # delete folder
+                        fullPath = self.syncFolderPath + path
+                        if os.path.isdir(fullPath):
+                            shutil.rmtree(fullPath)
+                            print("deleted " + fullPath +
+                                  " (does not exists on the server)")
+
+    @staticmethod
+    def __remoteFolderExists(self, path):
+        for folder in self.remoteFolders:
+            if "path" in folder and folder["path"] == path:
+                return True
+
+        return False
