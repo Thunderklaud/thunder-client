@@ -1,6 +1,7 @@
 from ui.loginui import LoginUI
 from ui.settingsui import SettingsUI
 from PySide6 import QtWidgets
+from services.login import doAfterLoginActions
 
 
 class UIManager(QtWidgets.QWidget):
@@ -31,3 +32,5 @@ class UIManager(QtWidgets.QWidget):
         self.widget.resize(350, 400)
         self.widget.show()
         self.widget.setWindowTitle("Thunderklaud Settings")
+
+        doAfterLoginActions()
