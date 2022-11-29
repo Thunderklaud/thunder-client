@@ -10,10 +10,8 @@ from services.login import doAfterLoginActions
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
-    if False:
-        folder_syncer = FolderSyncer()
-        folder_syncer.run()
-        sys.exit()
+    # folder_syncer = FolderSyncer()
+    # folder_syncer.run()
 
     # prepare local app path
     LocalAppManager.createLocalAppPathIfNotExists()

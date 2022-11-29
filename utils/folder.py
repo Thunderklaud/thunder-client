@@ -39,3 +39,16 @@ def removeBaseURL(path):
     path = path[localPathLength:pathLength]
 
     return uniqieFolderPath(path)
+
+
+def getFolderName(path):
+    position = path.rfind("/") + 1  # + 1 to remove the / at the begin
+    string_length = len(path)
+
+    return path[position:string_length]
+
+
+def getFolderPath(path):
+    position = path.rfind("/")
+
+    return path[0:position]

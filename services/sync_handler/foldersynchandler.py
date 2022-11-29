@@ -1,8 +1,9 @@
+import requests
 from watchdog.events import FileSystemEventHandler
 from services.localappmanager import LocalAppManager
 from services.serversettings import ServerSettings
-import requests
 from config import Config
+from utils.folder import removeBaseURL, getFolderName, getFolderPath
 
 
 class FolderSyncHandler(FileSystemEventHandler):
@@ -22,12 +23,12 @@ class FolderSyncHandler(FileSystemEventHandler):
 
         # if remote folder was found
         if remote_folder:
-            old_folder_path = FolderSyncHandler.__getFolderPath(src)
-            new_folder_path = FolderSyncHandler.__getFolderPath(dest)
+            old_folder_path = getFolderPath(src)
+            new_folder_path = getFolderPath(dest)
             # print(old_folder_path + ":"+new_folder_path)
 
-            old_folder_name = FolderSyncHandler.__getFolderName(src)
-            new_folder_name = FolderSyncHandler.__getFolderName(dest)
+            old_folder_name = getFolderName(src)
+            new_folder_name = getFolderName(dest)
             # print(old_folder_name + ":"+new_folder_name)
 
             # moved folder into another
@@ -46,30 +47,14 @@ class FolderSyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def __getRemoteFolder(path):
-        # remove base URL
-        localPathLength = len(
-            LocalAppManager.getSetting("local_sync_folder_path")) - 1  # -1 to hold the slash at the beginning
-        pathLength = len(path)
-        path = path[localPathLength:pathLength]
+        path = removeBaseURL(path)
 
         # search for sync folder by path
         syncFolders = ServerSettings.getSyncFolders(False)
+
         for syncFolder in syncFolders:
             # print(path+":"+syncFolder["path"])
             if "path" in syncFolder and syncFolder["path"] == path:
                 return syncFolder
 
         return {}
-
-    @staticmethod
-    def __getFolderName(path):
-        position = path.rfind("/") + 1  # + 1 to remove the / at the begin
-        string_length = len(path)
-
-        return path[position:string_length]
-
-    @staticmethod
-    def __getFolderPath(path):
-        position = path.rfind("/")
-
-        return path[0:position]

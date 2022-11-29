@@ -1,4 +1,6 @@
 import time
+import threading
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from services.sync_handler.foldersynchandler import FolderSyncHandler
@@ -13,6 +15,10 @@ class FolderSyncer:
             "local_sync_folder_path")
 
     def run(self):
+        t1 = threading.Thread(target=self.start)
+        t1.start()
+
+    def start(self):
         print("start folder sync")
         event_handler = SyncHandler()
 
