@@ -30,20 +30,22 @@ class Worker:
 
         # build request data
         if parent_id is not None:
-            data = '{"id": "' + str(parent_id) + '"}'
+            data = {"id": str(parent_id)}
         else:
-            data = '{}'
+            data = {}
 
         # do server request
         request_url = getRequestURL("/data/directory")
         headers = getRequestHeaders()
-        response = requests.get(url=request_url, data=data, headers=headers)
+        response = requests.get(url=request_url, json=data, headers=headers)
 
+        # handle response
         if response.status_code != 200:
             return []
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
 
+        # loop the result
         for dir in dirs:
             folder = {}
             folderID = dir["id"]["$oid"]
