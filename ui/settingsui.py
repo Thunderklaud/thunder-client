@@ -46,11 +46,31 @@ class SettingsUI(QtWidgets.QWidget):
         syncFoldersBox = QtWidgets.QGroupBox("Sync Folders")
         self.syncFoldersLayout = QtWidgets.QVBoxLayout()
 
-        syncFolders = ServerSettings.getSyncFolders()
-        self.addSyncFolderRecursive(syncFolders)
+        self.refresh_button = QtWidgets.QPushButton("↻")
+        self.refresh_button.setToolTip(
+            "Fetch the newest folders from the server")
+        self.refresh_button.clicked.connect(self.addSyncFolders)
+        self.syncFoldersLayout.addWidget(self.refresh_button)
+
+        # syncFolders = ServerSettings.getSyncFolders()
+        # self.addSyncFolderRecursive(syncFolders)
 
         syncFoldersBox.setLayout(self.syncFoldersLayout)
         self.contentLayout.addWidget(syncFoldersBox)
+
+    def addSyncFolders(self):
+        self.refresh_button.setText("Loading...")
+
+        # remove all folder checkboxes
+        count = self.syncFoldersLayout.count()
+        for i in range(1, count):
+            item = self.syncFoldersLayout.itemAt(1).widget()
+            item.setParent(None)
+
+        syncFolders = ServerSettings.getSyncFolders()
+        self.addSyncFolderRecursive(syncFolders)
+
+        self.refresh_button.setText("↻")
 
     def addSyncFolderRecursive(self, folder, level=0):
         perLevelPadding = 7

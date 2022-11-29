@@ -7,6 +7,8 @@ from config import Config
 class Worker:
 
     def start(self):
+        print("starting background service worker...")
+
         self.syncFolderPath = LocalAppManager.getSetting(
             "local_sync_folder_path")
 
@@ -64,3 +66,6 @@ class Worker:
             result.append(folder)
 
         return result
+
+    @staticmethod
+    def __deleteFoldersNotOnServer(self):
