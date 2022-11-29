@@ -26,9 +26,13 @@ def login(email, password, openSetingsScreen):
     response = requests.post(
         "http://localhost:8080/v1/user/login", json=loginData)
 
-
     if response.status_code != 200:
         return "Login failed: " + response.text
+
+    jsonResponse = response.json()
+
+    if "status" in jsonResponse and not jsonResponse.status:
+        return "Login failed: " + response.error
 
     jwt = response.json()["jwt"]
     LocalAppManager.saveJWTLocally(jwt)
