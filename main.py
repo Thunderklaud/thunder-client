@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # init UIManager
     uimanager = UIManager()
-    widget = uimanager.createUI(loggedIn)
+    uimanager.createUI(loggedIn)
 
     # start background worker when user is logged in on startup
     doAfterLoginActions()

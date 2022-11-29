@@ -7,30 +7,35 @@ from services.login import doAfterLoginActions
 class UIManager(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+        self.settingsWindow = None
+        self.loginWindow = None
 
     def createUI(self, loggedIn):
-        self.widget = QtWidgets.QStackedWidget()
-
-        self.widget.addWidget(SettingsUI(self.openLoginScreen))
-        self.widget.addWidget(LoginUI(self.openSettingsScreen))
-
         if loggedIn:
-            self.openSettingsScreen()
+            self.openSettingsWindow()
         else:
-            self.openLoginScreen()
+            self.openLoginWindow()
 
-        return self.widget
+    def openLoginWindow(self):
+        # close other windows
+        if self.settingsWindow is not None:
+            self.settingsWindow.close()
+            self.settingsWindow = None
 
-    def openLoginScreen(self):
-        self.widget.setCurrentIndex(1)
-        self.widget.resize(250, 250)
-        self.widget.show()
-        self.widget.setWindowTitle("Thunderklaud")
+        self.loginWindow = LoginUI(self.openSettingsWindow)
+        self.loginWindow.resize(250, 250)
+        self.loginWindow.show()
+        self.loginWindow.setWindowTitle("Thunderklaud")
 
-    def openSettingsScreen(self):
-        self.widget.setCurrentIndex(0)
-        self.widget.resize(350, 400)
-        self.widget.show()
-        self.widget.setWindowTitle("Thunderklaud Settings")
+    def openSettingsWindow(self):
+        # close other windows
+        if self.loginWindow is not None:
+            self.loginWindow.close()
+            self.loginWindow = None
 
+        self.settingsWindow = SettingsUI(self.openLoginWindow)
+        self.settingsWindow.resize(350, 400)
+        self.settingsWindow.setWindowTitle("Thunderklaud Settings")
+        self.settingsWindow.show()
+        
         doAfterLoginActions()
