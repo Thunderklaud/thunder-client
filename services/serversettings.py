@@ -1,63 +1,54 @@
 import requests
-from services.localappmanager import LocalAppManager
-from config import Config
+from utils.folder import uniqieFolderPath
+from utils.request import getRequestURL, getRequestHeaders
 
 
 class ServerSettings():
 
     @staticmethod
-    def getSyncFolders(multidimensional_array=True):
-
+    def getSyncFolders(multidimensionalArray=True):
         folders = ServerSettings.__getFolderRecursive(
-            None, "", multidimensional_array)
-        # print(folders)
-        # print("END")
+            None, "", multidimensionalArray)
         return folders
 
     @staticmethod
-    def __getFolderRecursive(parent_id=None, path="", multidimensional_array=True):
+    def __getFolderRecursive(parentId=None, path="", multidimensionalArray=True):
         result = []
 
-        jwt = LocalAppManager.readLocalJWT()
-        headers = {"Content-Type": "application/json",
-                   "Authorization": "Bearer {}".format(jwt)}
-        request_url = LocalAppManager.getSetting(
-            "server_url") + Config.API_VERSION + "/data/directory"
-
         # build request data
-        if parent_id is not None:
-            data = {"id": str(parent_id)}
+        if parentId is not None:
+            data = {"id": str(parentId)}
         else:
             data = {}
 
+        # do server request
+        request_url = getRequestURL("/data/directory")
+        headers = getRequestHeaders()
         response = requests.get(url=request_url, json=data, headers=headers)
 
-        # DEBUG
-        print("request: " + str(data))
-        # END DEBUG
-
+        # handle response
         if response.status_code != 200:
             return []
-
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
 
+        # loop the result
         for dir in dirs:
             folder = {}
             folderID = dir["id"]["$oid"]
             folderName = dir["name"]
 
+            childPath = uniqieFolderPath(path + "/" + folderName)
+
             folder["id"] = folderID
             folder["name"] = folderName
-            folder["path"] = path + "/" + folderName
-
-            childPath = path + "/" + folderName
+            folder["path"] = childPath
 
             folderChildren = ServerSettings.__getFolderRecursive(
-                folderID, childPath, multidimensional_array)
+                folderID, childPath, multidimensionalArray)
 
             # set children as variable
-            if multidimensional_array:
+            if multidimensionalArray:
                 folder["children"] = folderChildren
             else:
                 # add children to arrays root level
@@ -66,18 +57,3 @@ class ServerSettings():
             result.append(folder)
 
         return result
-
-    # this method is just to add some test folders (no productive use)
-    @staticmethod
-    def __addTestFolders():
-        jwt = LocalAppManager.readLocalJWT()
-        headers = {"Content-Type": "application/json",
-                   "Authorization": "Bearer {}".format(jwt)}
-        request_url = LocalAppManager.getSetting(
-            "server_url") + Config.API_VERSION + "/data/directory"
-        res = requests.post(
-            url=request_url, data='{"name": "Doc"}', headers=headers)
-        res = requests.post(
-            url=request_url, data='{"name": "Doc 2"}', headers=headers)
-        res = requests.post(
-            url=request_url, data='{"name": "Doc 3"}', headers=headers)

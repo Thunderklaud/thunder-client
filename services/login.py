@@ -1,6 +1,7 @@
 import requests
 from hashlib import sha256
 from services.localappmanager import LocalAppManager
+from services.worker import Worker
 
 
 def isLoggedIn():
@@ -49,3 +50,9 @@ def logout(openLoginScreen):
 
 def hashPassword(string):
     return str(sha256(string.encode('utf-8')).hexdigest())
+
+
+def doAfterLoginActions():
+    if isLoggedIn():
+        worker = Worker()
+        worker.start()

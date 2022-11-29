@@ -1,11 +1,11 @@
 import sys
 from threading import Thread
 from ui.manager import UIManager
-from services.worker import Worker
 from services.foldersyncer import FolderSyncer
 from PySide6 import QtWidgets
 from services.login import isLoggedIn
 from services.localappmanager import LocalAppManager
+from services.login import doAfterLoginActions
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
@@ -26,8 +26,6 @@ if __name__ == "__main__":
     uimanager.createUI(loggedIn)
 
     # start background worker when user is logged in on startup
-    if loggedIn:
-        worker = Worker()
-        worker.start()
+    doAfterLoginActions()
 
     sys.exit(app.exec())
