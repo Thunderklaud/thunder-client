@@ -4,10 +4,11 @@ import threading
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from services.sync_handler.foldersynchandler import FolderSyncHandler
+from services.sync_handler.filesynchandler import FileSyncHandler
 from services.localappmanager import LocalAppManager
 
 
-class FolderSyncer:
+class ThunderSyncHandler:
 
     def __init__(self):
         self.observer = Observer()
@@ -39,6 +40,14 @@ class SyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def on_any_event(event):
+        print(event)
         if event.is_directory:
             folderHandler = FolderSyncHandler()
             folderHandler.handle(event)
+
+        if not event.is_directory:
+            fileHandler = FileSyncHandler()
+            fileHandler.handle(event)
+
+        # delete files and folders
+        # if not event.is_directory and event.event_type == "deleted":

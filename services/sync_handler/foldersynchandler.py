@@ -1,8 +1,7 @@
 import requests
 from watchdog.events import FileSystemEventHandler
-from services.localappmanager import LocalAppManager
 from services.serversettings import ServerSettings
-from config import Config
+from utils.request import getRequestURL, getRequestHeaders
 from utils.folder import removeBaseURL, getFolderName, getFolderPath
 
 
@@ -11,10 +10,37 @@ class FolderSyncHandler(FileSystemEventHandler):
     @staticmethod
     def handle(event):
 
+        # print(event)
+
         if event.event_type == "moved":
             src_path = event.src_path.replace("\\", "/")
             dest_path = event.dest_path.replace("\\", "/")
             FolderSyncHandler.__moveFolder(src_path, dest_path)
+
+        if event.event_type == "created":
+            src_path = event.src_path.replace("\\", "/")
+            FolderSyncHandler.__createFolder(src_path)
+
+    @staticmethod
+    def __createFolder(src):
+        print("create folder " + src)
+
+        folderName = getFolderName(src)
+        folderPath = getFolderPath(src)
+
+        remote_folder = FolderSyncHandler.__getRemoteFolder(folderPath)
+        print(remote_folder)
+
+        parent_id = ""
+        if remote_folder:
+            parent_id = remote_folder["id"]
+
+        print("create folder: " + folderName + " inside " + folderPath)
+        request_url = getRequestURL("/data/directory")
+        headers = getRequestHeaders()
+        data = {"parent_id": parent_id, "name": folderName}
+        response = requests.post(
+            url=request_url, json=data, headers=headers)
 
     @staticmethod
     def __moveFolder(src, dest):
@@ -36,11 +62,8 @@ class FolderSyncHandler(FileSystemEventHandler):
                 print("moved folder")
             else:  # renamed folder
                 print("renamed folder")
-                jwt = LocalAppManager.readLocalJWT()
-                headers = {"Content-Type": "application/json",
-                           "Authorization": "Bearer {}".format(jwt)}
-                request_url = LocalAppManager.getSetting(
-                    "server_url") + Config.API_VERSION + "/data/directory"
+                request_url = getRequestURL("/data/directory")
+                headers = getRequestHeaders()
                 data = {"id": remote_folder["id"], "name": new_folder_name}
                 response = requests.patch(
                     url=request_url, json=data, headers=headers)
