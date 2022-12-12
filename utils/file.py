@@ -61,7 +61,7 @@ def removeBaseURL(path, isFile):
     return uniqueDirectoryPath(path)
 
 
-def getDirectoryName(path):
+def getDirectoryOrFileName(path):
     position = path.rfind("/") + 1  # + 1 to remove the / at the begin
     string_length = len(path)
 

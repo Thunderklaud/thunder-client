@@ -2,7 +2,7 @@ import requests
 from watchdog.events import FileSystemEventHandler
 from services.serversettings import ServerSettings
 from utils.request import getRequestURL, getRequestHeaders
-from utils.file import removeBaseURL, getDirectoryName, getDirectoryPath
+from utils.file import removeBaseURL, getDirectoryOrFileName, getDirectoryPath
 
 
 class FileSyncHandler(FileSystemEventHandler):
@@ -21,7 +21,22 @@ class FileSyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def __createFile(src):
-        print("TODO create file " + src)
+        print("create file " + src)
+
+        # get current directory
+        directoryPath = getDirectoryPath(src)
+        remoteDirectory = FileSyncHandler.__getRemoteDirectory(directoryPath)
+
+        # get new created file
+        fileName = getDirectoryOrFileName(src)
+        files = {"file": open(src, "rb")}
+
+        request_url = getRequestURL("/data/file")
+        request_url += "?directory=" + remoteDirectory["id"]
+
+        headers = getRequestHeaders(True, "")
+        response = requests.put(
+            url=request_url, files=files, headers=headers)
 
     @staticmethod
     def __moveFile(src, dest):
@@ -32,7 +47,6 @@ class FileSyncHandler(FileSystemEventHandler):
         print("delete file: " + event.src_path)
 
         src_path = event.src_path.replace("\\", "/")
-
         remoteFile = FileSyncHandler.__getRemoteFile(src_path)
 
         if remoteFile:
@@ -55,5 +69,18 @@ class FileSyncHandler(FileSystemEventHandler):
         for remotePath in remoteFiles:
             if "path" in remotePath and remotePath["path"] == path:
                 return remotePath
+
+        return {}
+
+    @staticmethod
+    def __getRemoteDirectory(path):
+        path = removeBaseURL(path, False)
+
+        # search for sync directory by path
+        syncDirectories = ServerSettings.getSyncDirectories(False)
+
+        for syncDirectory in syncDirectories:
+            if "path" in syncDirectory and syncDirectory["path"] == path:
+                return syncDirectory
 
         return {}

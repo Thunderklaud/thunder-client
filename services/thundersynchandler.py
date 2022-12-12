@@ -44,6 +44,7 @@ class SyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def on_any_event(event):
+        print(event)
 
         directoryHandler = DirectorySyncHandler()
         fileHandler = FileSyncHandler()

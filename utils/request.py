@@ -7,9 +7,12 @@ def getRequestURL(route):
         "server_url") + Config.API_VERSION + route
 
 
-def getRequestHeaders(auth=True):
+def getRequestHeaders(auth=True, contentType="application/json"):
     jwt = LocalAppManager.readLocalJWT()
-    headers = {"Content-Type": "application/json"}
+    headers = {}
+
+    if contentType:
+        headers = {"Content-Type": contentType}
 
     if auth:
         headers["Authorization"] = "Bearer {}".format(jwt)

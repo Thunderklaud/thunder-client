@@ -98,9 +98,12 @@ class Worker:
         response = requests.get(url=request_url, json={}, headers=headers)
 
         # create and write local file
-        fileHandle = io.open(filePath, "wb")
-        fileHandle.write(response.text.encode("utf-8"))
-        fileHandle.close()
+        try:
+            fileHandle = io.open(filePath, "wb")
+            fileHandle.write(response.text.encode("utf-8"))
+            fileHandle.close()
+        except PermissionError:
+            print("[ERR] Permission denied")
 
         return fileResult
 

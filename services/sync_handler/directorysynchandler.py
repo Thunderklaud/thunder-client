@@ -2,7 +2,7 @@ import requests
 from watchdog.events import FileSystemEventHandler
 from services.serversettings import ServerSettings
 from utils.request import getRequestURL, getRequestHeaders
-from utils.file import removeBaseURL, getDirectoryName, getDirectoryPath
+from utils.file import removeBaseURL, getDirectoryOrFileName, getDirectoryPath
 
 
 class DirectorySyncHandler(FileSystemEventHandler):
@@ -23,7 +23,7 @@ class DirectorySyncHandler(FileSystemEventHandler):
     def __createDirectory(src):
         print("create directory " + src)
 
-        directoryName = getDirectoryName(src)
+        directoryName = getDirectoryOrFileName(src)
         directoryPath = getDirectoryPath(src)
 
         remoteDirectory = DirectorySyncHandler.__getRemoteDirectory(
@@ -52,8 +52,8 @@ class DirectorySyncHandler(FileSystemEventHandler):
             directoryPath = getDirectoryPath(dest)
             print(directoryPath + ":"+directoryPath)
 
-            directoryName = getDirectoryName(src)
-            directoryName = getDirectoryName(dest)
+            directoryName = getDirectoryOrFileName(src)
+            directoryName = getDirectoryOrFileName(dest)
             print(directoryName + ":"+directoryName)
 
             # moved directory into another
