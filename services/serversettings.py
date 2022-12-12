@@ -1,5 +1,5 @@
 import requests
-from utils.folder import uniqieFolderPath
+from utils.file import uniqueFolderPath
 from utils.request import getRequestURL, getRequestHeaders
 
 
@@ -15,16 +15,15 @@ class ServerSettings():
     def __getFolderRecursive(parentId=None, path="", multidimensionalArray=True):
         result = []
 
-        # build request data
-        if parentId is not None:
-            data = {"id": str(parentId)}
-        else:
-            data = {}
-
         # do server request
         request_url = getRequestURL("/data/directory")
         headers = getRequestHeaders()
-        response = requests.get(url=request_url, json=data, headers=headers)
+
+        # build request data
+        if parentId is not None:
+            request_url += "?id=" + str(parentId)
+
+        response = requests.get(url=request_url, json={}, headers=headers)
 
         # handle response
         if response.status_code != 200:
@@ -38,7 +37,7 @@ class ServerSettings():
             folderID = dir["id"]["$oid"]
             folderName = dir["name"]
 
-            childPath = uniqieFolderPath(path + "/" + folderName)
+            childPath = uniqueFolderPath(path + "/" + folderName)
 
             folder["id"] = folderID
             folder["name"] = folderName

@@ -52,8 +52,8 @@ class SettingsUI(QtWidgets.QWidget):
         self.refresh_button.clicked.connect(self.addSyncFolders)
         self.syncFoldersLayout.addWidget(self.refresh_button)
 
-        # syncFolders = ServerSettings.getSyncFolders()
-        # self.addSyncFolderRecursive(syncFolders)
+        syncFolders = ServerSettings.getSyncFolders()
+        self.addSyncFolderRecursive(syncFolders)
 
         syncFoldersBox.setLayout(self.syncFoldersLayout)
         self.contentLayout.addWidget(syncFoldersBox)

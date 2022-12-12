@@ -1,7 +1,7 @@
 from services.localappmanager import LocalAppManager
 
 
-def remoteFolderExists(folders, path):
+def remoteFileOrFolderExists(folders, path):
     for folder in folders:
         if "path" in folder and folder["path"] == path:
             return True
@@ -9,7 +9,7 @@ def remoteFolderExists(folders, path):
     return False
 
 
-def uniqieFolderPath(path):
+def uniqueFolderPath(path):
     if path == "":
         return "/"
 
@@ -26,19 +26,39 @@ def uniqieFolderPath(path):
     if not beginningSlash and not beginningDot:
         path = "/" + path
 
-    # remove double slashes
+    # TODO: remove double slashes
 
     return path
 
 
-def removeBaseURL(path):
+def uniqueFilePath(path):
+    if path == "":
+        return "/"
+
+    path = path.replace("\\", "/")
+    path = path.replace("//", "/")
+
+    beginningDot = path[0] == "."
+    beginningSlash = path[0] == "/"
+
+    if not beginningSlash and not beginningDot:
+        path = "/" + path
+
+    # TODO: remove double slashes
+
+    return path
+
+
+def removeBaseURL(path, isFile):
     syncFolderPath = LocalAppManager.getSetting(
         "local_sync_folder_path")
     localPathLength = len(syncFolderPath)
     pathLength = len(path)
     path = path[localPathLength:pathLength]
 
-    return uniqieFolderPath(path)
+    if isFile:
+        return uniqueFilePath(path)
+    return uniqueFolderPath(path)
 
 
 def getFolderName(path):

@@ -2,7 +2,7 @@ import requests
 from watchdog.events import FileSystemEventHandler
 from services.serversettings import ServerSettings
 from utils.request import getRequestURL, getRequestHeaders
-from utils.folder import removeBaseURL, getFolderName, getFolderPath
+from utils.file import removeBaseURL, getFolderName, getFolderPath
 
 
 class FileSyncHandler(FileSystemEventHandler):

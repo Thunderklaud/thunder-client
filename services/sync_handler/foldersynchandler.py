@@ -2,7 +2,7 @@ import requests
 from watchdog.events import FileSystemEventHandler
 from services.serversettings import ServerSettings
 from utils.request import getRequestURL, getRequestHeaders
-from utils.folder import removeBaseURL, getFolderName, getFolderPath
+from utils.file import removeBaseURL, getFolderName, getFolderPath
 
 
 class FolderSyncHandler(FileSystemEventHandler):
@@ -70,7 +70,7 @@ class FolderSyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def __getRemoteFolder(path):
-        path = removeBaseURL(path)
+        path = removeBaseURL(path, True)
 
         # search for sync folder by path
         syncFolders = ServerSettings.getSyncFolders(False)

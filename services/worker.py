@@ -1,91 +1,136 @@
 import shutil
 import os
+import io
 from glob import iglob
 from services.localappmanager import LocalAppManager
 import requests
 from config import Config
-from utils.folder import uniqieFolderPath, remoteFolderExists, removeBaseURL
+from utils.file import uniqueFolderPath, uniqueFilePath, remoteFileOrFolderExists, removeBaseURL
 from utils.request import getRequestURL, getRequestHeaders
 
 
 class Worker:
 
     def start(self):
-        self.sync_folder_paths = LocalAppManager.getSetting(
+        self.syncFolderPath = LocalAppManager.getSetting(
             "local_sync_folder_path")
 
         # create sync folder if not exists
-        if not os.path.isdir(self.sync_folder_paths):
-            os.makedirs(self.sync_folder_paths)
+        if not os.path.isdir(self.syncFolderPath):
+            os.makedirs(self.syncFolderPath)
 
         # create local folders
-        self.remoteFolders = Worker.__createFolderRecursive(self)
+        self.remoteFilesAndFolders = Worker.__downloadRemoteContentRecursive(
+            self)
 
         # delete local folders that does not exists on the server
-        Worker.__deleteFoldersNotOnServer(self)
+        Worker.__deleteFilesAndFoldersNotOnServer(self)
 
     @staticmethod
-    def __createFolderRecursive(self, parent_id=None, path=""):
+    def __downloadRemoteContentRecursive(self, parent_id=None, path=""):
         result = []
-
-        # build request data
-        if parent_id is not None:
-            data = {"id": str(parent_id)}
-        else:
-            data = {}
 
         # do server request
         request_url = getRequestURL("/data/directory")
         headers = getRequestHeaders()
-        response = requests.get(url=request_url, json=data, headers=headers)
+
+        # build request data
+        if parent_id is not None:
+            request_url += "?id=" + str(parent_id)
+        response = requests.get(url=request_url, json={}, headers=headers)
 
         # handle response
         if response.status_code != 200:
             return []
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
+        files = jsonResponse["files"]
 
-        # loop the result
+        # download files
+        if len(files):
+            for file in files:
+                fileResult = Worker.__downloadFile(self, file, path)
+                result.append(fileResult)
+
+        # loop dirs
         for dir in dirs:
             folder = {}
             folderID = dir["id"]["$oid"]
             folderName = dir["name"]
 
             # create local folder
-            folderPath = self.sync_folder_paths + "/" + path + "/" + folderName
-            folderPath = uniqieFolderPath(folderPath)
+            folderPath = self.syncFolderPath + "/" + path + "/" + folderName
+            folderPath = uniqueFolderPath(folderPath)
             if not os.path.isdir(folderPath):
                 os.makedirs(folderPath)
 
-            childPath = uniqieFolderPath(path + "/" + folderName)
+            childPath = uniqueFolderPath(path + "/" + folderName)
             folder["id"] = folderID
             folder["name"] = folderName
             folder["path"] = childPath
-            result += Worker.__createFolderRecursive(self,
-                                                     folderID, childPath)
+            result += Worker.__downloadRemoteContentRecursive(self,
+                                                              folderID, childPath)
 
             result.append(folder)
 
         return result
 
     @staticmethod
-    def __deleteFoldersNotOnServer(self):
-        for path in iglob(self.sync_folder_paths + '/**/**', recursive=True):
+    def __downloadFile(self, file, path):
+        fileResult = {}
+
+        fileID = file["uuid"]
+        fileName = file["name"]
+        filePath = uniqueFilePath(self.syncFolderPath +
+                                  "/" + path + "/" + fileName)
+
+        fileResult["id"] = fileID
+        fileResult["name"] = fileName
+        fileResult["path"] = uniqueFilePath(path + "/" + fileName)
+
+        # do server request
+        request_url = getRequestURL("/data/download/file")
+        headers = getRequestHeaders()
+
+        # build request data
+        request_url += "?uuid=" + fileID
+
+        response = requests.get(url=request_url, json={}, headers=headers)
+
+        # create and write local file
+        fileHandle = io.open(filePath, "wb")
+        fileHandle.write(response.text.encode("utf-8"))
+        fileHandle.close()
+
+        return fileResult
+
+    @staticmethod
+    def __deleteFilesAndFoldersNotOnServer(self):
+        for path in iglob(self.syncFolderPath + '/**/**', recursive=True):
+            absolutePath = path
+
             # unique paths
-            path = uniqieFolderPath(path)
-
-            # delete folder id it does not exists on server
             if os.path.isdir(path):
+                path = uniqueFolderPath(path)
+            else:
+                path = uniqueFilePath(path)
 
-                path = removeBaseURL(path)
+            path = removeBaseURL(path, os.path.isfile(path))
 
-                # don't delete root path
-                if path != "/" and path != "":
+            # don't delete root path
+            if path != "/" and path != "":
 
-                    if not remoteFolderExists(self.remoteFolders, path):
+                if not remoteFileOrFolderExists(self.remoteFilesAndFolders, path):
 
-                        # delete folder
-                        fullPath = uniqieFolderPath(
-                            self.sync_folder_paths + path)
+                    # delete folder
+                    if os.path.isdir(absolutePath):
+                        fullPath = uniqueFolderPath(
+                            self.syncFolderPath + path)
                         if os.path.isdir(fullPath):
                             shutil.rmtree(fullPath)
+
+                    else:   # delete file
+                        fullPath = uniqueFilePath(self.syncFolderPath + path)
+                        if os.path.exists(fullPath):
+                            os.remove(fullPath)
+                        print("delete file " + path)
