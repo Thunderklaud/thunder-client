@@ -78,6 +78,8 @@ class SettingsUI(QtWidgets.QWidget):
 
         for dir in directory:
             checkbox = QtWidgets.QCheckBox(dir["name"], self)
+            checkbox.setObjectName(dir["id"])
+            print(checkbox.objectName())
             checkbox.setStyleSheet(
                 "margin-left: " + str(level * perLevelPadding) + "px")
             self.syncDirectoriesLayout.addWidget(checkbox)
@@ -131,14 +133,18 @@ class SettingsUI(QtWidgets.QWidget):
         self.bottomBarLayout.addWidget(saveButton)
 
     def clickedSave(self):
-        print(">>>Save<<<")
-        aList = [{"a": 54, "b": 87}, {"c": 81, "d": 63}, {"e": 17, "f": 39}]
-        jsonString = json.dumps(aList)
+        settings = {}
+
+        settings["syncFolderPath"] =  LocalAppManager.getSetting("local_sync_folder_path")
+        settings["syncFolders"] = self.getFoldersToSave()
+       
+        settings = json.dumps(settings)
         path = LocalAppManager.getLocalAppPath() + "settings.json"
-        print("Path::: " + path)
+
+        
 
         jsonFile = open(path, "w")
-        jsonFile.write(jsonString)
+        jsonFile.write(settings)
         jsonFile.close()
 
     def createLogoutButton(self):
@@ -161,3 +167,14 @@ class SettingsUI(QtWidgets.QWidget):
         # add new notification
         notification = QtWidgets.QLabel(text)
         self.bottomBarLayout.addWidget(notification)
+
+    def getFoldersToSave(self):
+        count = self.syncFoldersLayout.count()
+        objectNames = []
+        for i in range(1, count):
+            item = self.syncFoldersLayout.itemAt(i).widget()
+            if(item.isChecked()):
+                objectNames.append(item.objectName())
+        return objectNames
+
+
