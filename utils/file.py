@@ -1,15 +1,15 @@
 from services.localappmanager import LocalAppManager
 
 
-def remoteFileOrFolderExists(folders, path):
-    for folder in folders:
-        if "path" in folder and folder["path"] == path:
+def remoteFileOrDirectoryExists(directories, path):
+    for directory in directories:
+        if "path" in directory and directory["path"] == path:
             return True
 
     return False
 
 
-def uniqueFolderPath(path):
+def uniqueDirectoryPath(path):
     if path == "":
         return "/"
 
@@ -50,25 +50,25 @@ def uniqueFilePath(path):
 
 
 def removeBaseURL(path, isFile):
-    syncFolderPath = LocalAppManager.getSetting(
+    syncDirectoryPath = LocalAppManager.getSetting(
         "local_sync_folder_path")
-    localPathLength = len(syncFolderPath)
+    localPathLength = len(syncDirectoryPath)
     pathLength = len(path)
     path = path[localPathLength:pathLength]
 
     if isFile:
         return uniqueFilePath(path)
-    return uniqueFolderPath(path)
+    return uniqueDirectoryPath(path)
 
 
-def getFolderName(path):
+def getDirectoryName(path):
     position = path.rfind("/") + 1  # + 1 to remove the / at the begin
     string_length = len(path)
 
     return path[position:string_length]
 
 
-def getFolderPath(path):
+def getDirectoryPath(path):
     position = path.rfind("/")
 
     return path[0:position]

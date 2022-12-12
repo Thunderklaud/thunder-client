@@ -39,53 +39,53 @@ class SettingsUI(QtWidgets.QWidget):
         self.createLogoutButton()
 
     def createMainContent(self):
-        self.createSyncFoldersArea()
+        self.createSyncDirectoriesArea()
         self.createSettingsArea()
         self.createAboutArea()
 
-    def createSyncFoldersArea(self):
-        syncFoldersBox = QtWidgets.QGroupBox("Sync Folders")
-        self.syncFoldersLayout = QtWidgets.QVBoxLayout()
+    def createSyncDirectoriesArea(self):
+        syncDirectoriesBox = QtWidgets.QGroupBox("Sync Directories")
+        self.syncDirectoriesLayout = QtWidgets.QVBoxLayout()
 
         self.refresh_button = QtWidgets.QPushButton("↻")
         self.refresh_button.setToolTip(
-            "Fetch the newest folders from the server")
-        self.refresh_button.clicked.connect(self.addSyncFolders)
-        self.syncFoldersLayout.addWidget(self.refresh_button)
+            "Fetch the newest directories from the server")
+        self.refresh_button.clicked.connect(self.addSyncDirectories)
+        self.syncDirectoriesLayout.addWidget(self.refresh_button)
 
-        syncFolders = ServerSettings.getSyncFolders()
-        self.addSyncFolderRecursive(syncFolders)
+        syncDirectories = ServerSettings.getSyncDirectories()
+        self.addSyncDirectoryRecursive(syncDirectories)
 
-        syncFoldersBox.setLayout(self.syncFoldersLayout)
-        self.contentLayout.addWidget(syncFoldersBox)
+        syncDirectoriesBox.setLayout(self.syncDirectoriesLayout)
+        self.contentLayout.addWidget(syncDirectoriesBox)
 
-    def addSyncFolders(self):
+    def addSyncDirectories(self):
         self.refresh_button.setText("Loading...")
 
-        # remove all folder checkboxes
-        count = self.syncFoldersLayout.count()
+        # remove all directories checkboxes
+        count = self.syncDirectoriesLayout.count()
         for i in range(1, count):
-            item = self.syncFoldersLayout.itemAt(1).widget()
+            item = self.syncDirectoriesLayout.itemAt(1).widget()
             item.setParent(None)
 
-        syncFolders = ServerSettings.getSyncFolders()
-        self.addSyncFolderRecursive(syncFolders)
+        syncDirectories = ServerSettings.getSyncDirectories()
+        self.addSyncDirectoryRecursive(syncDirectories)
 
         self.refresh_button.setText("↻")
 
-    def addSyncFolderRecursive(self, folder, level=0):
+    def addSyncDirectoryRecursive(self, directory, level=0):
         perLevelPadding = 7
 
-        for dir in folder:
+        for dir in directory:
             checkbox = QtWidgets.QCheckBox(dir["name"], self)
             checkbox.setObjectName(dir["id"])
             print(checkbox.objectName())
             checkbox.setStyleSheet(
                 "margin-left: " + str(level * perLevelPadding) + "px")
-            self.syncFoldersLayout.addWidget(checkbox)
+            self.syncDirectoriesLayout.addWidget(checkbox)
 
             if "children" in dir and len(dir["children"]):
-                self.addSyncFolderRecursive(dir["children"], level + 1)
+                self.addSyncDirectoryRecursive(dir["children"], level + 1)
 
     def createSettingsArea(self):
         settingsBox = QtWidgets.QGroupBox("Settings")
@@ -117,11 +117,12 @@ class SettingsUI(QtWidgets.QWidget):
     def createLocalSyncPathInput(self):
         rowLayout = QtWidgets.QHBoxLayout()
 
-        syncFolderPathLabel = QtWidgets.QLabel("Local Sync Folder")
-        rowLayout.addWidget(syncFolderPathLabel)
+        syncDirectoryPathLabel = QtWidgets.QLabel("Local Sync Directory")
+        rowLayout.addWidget(syncDirectoryPathLabel)
 
-        syncFolderPath = LocalAppManager.getSetting("local_sync_folder_path")
-        localSynyPathInput = QtWidgets.QLineEdit(syncFolderPath)
+        syncDirectoryPath = LocalAppManager.getSetting(
+            "local_sync_folder_path")
+        localSynyPathInput = QtWidgets.QLineEdit(syncDirectoryPath)
         rowLayout.addWidget(localSynyPathInput)
 
         self.settingsBoxLayout.addLayout(rowLayout)
