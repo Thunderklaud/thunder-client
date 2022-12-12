@@ -1,4 +1,5 @@
 import sys
+import json
 from PySide6 import QtCore, QtWidgets, QtGui
 from services.worker import Worker
 from services.serversettings import ServerSettings
@@ -125,7 +126,19 @@ class SettingsUI(QtWidgets.QWidget):
 
     def createSaveButton(self):
         saveButton = QtWidgets.QPushButton("Save")
+        saveButton.clicked.connect(self.clickedSave)
         self.bottomBarLayout.addWidget(saveButton)
+
+    def clickedSave(self):
+        print(">>>Save<<<")
+        aList = [{"a":54, "b":87}, {"c":81, "d":63}, {"e":17, "f":39}]
+        jsonString = json.dumps(aList)
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+        print("Path::: " + path)
+
+        jsonFile = open(path, "w")
+        jsonFile.write(jsonString)
+        jsonFile.close()
 
     def createLogoutButton(self):
         logoutButton = QtWidgets.QPushButton("Logout")
