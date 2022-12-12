@@ -1,15 +1,15 @@
 import requests
-from utils.file import uniqueFolderPath, uniqueFilePath
+from utils.file import uniqueDirectoryPath, uniqueFilePath
 from utils.request import getRequestURL, getRequestHeaders
 
 
 class ServerSettings():
 
     @staticmethod
-    def getSyncFolders(multidimensionalArray=True):
-        folders = ServerSettings.__getFolderRecursive(
+    def getSyncDirectories(multidimensionalArray=True):
+        directories = ServerSettings.__getDirectoryRecursive(
             None, "", multidimensionalArray)
-        return folders
+        return directories
 
     @staticmethod
     def getSyncFiles():
@@ -17,7 +17,7 @@ class ServerSettings():
         return files
 
     @staticmethod
-    def __getFolderRecursive(parentId=None, path="", multidimensionalArray=True):
+    def __getDirectoryRecursive(parentId=None, path="", multidimensionalArray=True):
         result = []
 
         # do server request
@@ -38,27 +38,27 @@ class ServerSettings():
 
         # loop the result
         for dir in dirs:
-            folder = {}
-            folderID = dir["id"]["$oid"]
-            folderName = dir["name"]
+            directory = {}
+            directoryID = dir["id"]["$oid"]
+            directoryName = dir["name"]
 
-            childPath = uniqueFolderPath(path + "/" + folderName)
+            childPath = uniqueDirectoryPath(path + "/" + directoryName)
 
-            folder["id"] = folderID
-            folder["name"] = folderName
-            folder["path"] = childPath
+            directory["id"] = directoryID
+            directory["name"] = directoryName
+            directory["path"] = childPath
 
-            folderChildren = ServerSettings.__getFolderRecursive(
-                folderID, childPath, multidimensionalArray)
+            directoryChildren = ServerSettings.__getDirectoryRecursive(
+                directoryID, childPath, multidimensionalArray)
 
             # set children as variable
             if multidimensionalArray:
-                folder["children"] = folderChildren
+                directory["children"] = directoryChildren
             else:
                 # add children to arrays root level
-                result += folderChildren
+                result += directoryChildren
 
-            result.append(folder)
+            result.append(directory)
 
         return result
 
@@ -98,12 +98,12 @@ class ServerSettings():
 
         # loop the result
         for dir in dirs:
-            folderID = dir["id"]["$oid"]
-            folderName = dir["name"]
+            directory = dir["id"]["$oid"]
+            directoryName = dir["name"]
 
-            childPath = uniqueFolderPath(path + "/" + folderName)
+            childPath = uniqueDirectoryPath(path + "/" + directoryName)
 
             result += ServerSettings.__getFilesRecursive(
-                folderID, childPath)
+                directory, childPath)
 
         return result

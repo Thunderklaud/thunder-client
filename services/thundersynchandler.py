@@ -4,7 +4,7 @@ import os
 
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from services.sync_handler.foldersynchandler import FolderSyncHandler
+from services.sync_handler.directorysynchandler import DirectorySyncHandler
 from services.sync_handler.filesynchandler import FileSyncHandler
 from services.localappmanager import LocalAppManager
 from services.serversettings import ServerSettings
@@ -23,7 +23,8 @@ class ThunderSyncHandler:
         t1.start()
 
     def start(self):
-        print("start folder sync")
+        print("[INFO] Starting synchronisation for " +
+              self.observer_directory)
         event_handler = SyncHandler()
 
         self.observer.schedule(
@@ -33,7 +34,7 @@ class ThunderSyncHandler:
         self.observer.start()
         try:
             while True:
-                time.sleep(5)
+                time.sleep(3)
         except:
             self.observer.stop()
             print("Observer error")
@@ -44,37 +45,37 @@ class SyncHandler(FileSystemEventHandler):
     @staticmethod
     def on_any_event(event):
 
-        folderHandler = FolderSyncHandler()
+        directoryHandler = DirectorySyncHandler()
         fileHandler = FileSyncHandler()
 
-        # delete files and folders
+        # delete files and directories
         if event.event_type == "deleted":
-            SyncHandler.__deleteFileOrFolder(event)
+            SyncHandler.__deleteFileOrDirectory(event)
             return
 
         if event.is_directory:
-            folderHandler.handle(event)
+            directoryHandler.handle(event)
 
         if not event.is_directory:
             fileHandler.handle(event)
 
     @staticmethod
-    def __deleteFileOrFolder(event):
+    def __deleteFileOrDirectory(event):
 
         filePath = removeBaseURL(event.src_path, True)
-        folderPath = removeBaseURL(event.src_path, False)
+        directoryPath = removeBaseURL(event.src_path, False)
         deleteType = 0  # 0 = undefined, 1 = file, 2 = directory
         remoteObject = {}
 
-        # check if remote folder exists
-        remoteFolders = ServerSettings.getSyncFolders(False)
-        for syncFolder in remoteFolders:
-            if "path" in syncFolder and syncFolder["path"] == folderPath:
+        # check if remote directory exists
+        remoteDirectories = ServerSettings.getSyncDirectories(False)
+        for syncDirectory in remoteDirectories:
+            if "path" in syncDirectory and syncDirectory["path"] == directoryPath:
                 deleteType = 2
-                remoteObject = syncFolder
+                remoteObject = syncDirectory
                 break
 
-        # if path is not an folder => check if its a file
+        # if path is not an directory => check if its a file
         if "id" not in remoteObject:
             remoteFiles = ServerSettings.getSyncFiles()
             for syncFile in remoteFiles:
@@ -86,6 +87,6 @@ class SyncHandler(FileSystemEventHandler):
         if deleteType == 1:
             FileSyncHandler.deleteFile(event)
         elif deleteType == 2:
-            FolderSyncHandler.deleteFolder(event)
+            DirectorySyncHandler.deleteDirectory(event)
         else:
             print("ERR: undefined delete type")
