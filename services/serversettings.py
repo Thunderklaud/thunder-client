@@ -1,5 +1,5 @@
 import requests
-from utils.file import uniqueFolderPath
+from utils.file import uniqueFolderPath, uniqueFilePath
 from utils.request import getRequestURL, getRequestHeaders
 
 
@@ -10,6 +10,11 @@ class ServerSettings():
         folders = ServerSettings.__getFolderRecursive(
             None, "", multidimensionalArray)
         return folders
+
+    @staticmethod
+    def getSyncFiles():
+        files = ServerSettings.__getFilesRecursive(None, "")
+        return files
 
     @staticmethod
     def __getFolderRecursive(parentId=None, path="", multidimensionalArray=True):
@@ -54,5 +59,51 @@ class ServerSettings():
                 result += folderChildren
 
             result.append(folder)
+
+        return result
+
+    @staticmethod
+    def __getFilesRecursive(parentId=None, path=""):
+        result = []
+
+        # do server request
+        request_url = getRequestURL("/data/directory")
+        headers = getRequestHeaders()
+
+        # build request data
+        if parentId is not None:
+            request_url += "?id=" + str(parentId)
+
+        response = requests.get(url=request_url, json={}, headers=headers)
+
+        # handle response
+        if response.status_code != 200:
+            return []
+        jsonResponse = response.json()
+        files = jsonResponse["files"]
+        dirs = jsonResponse["dirs"]
+
+        # download files
+        if len(files):
+            for loopFile in files:
+                file = {}
+
+                fileID = loopFile["uuid"]
+                fileName = loopFile["name"]
+
+                file["id"] = fileID
+                file["name"] = fileName
+                file["path"] = uniqueFilePath(path + "/" + fileName)
+                result.append(file)
+
+        # loop the result
+        for dir in dirs:
+            folderID = dir["id"]["$oid"]
+            folderName = dir["name"]
+
+            childPath = uniqueFolderPath(path + "/" + folderName)
+
+            result += ServerSettings.__getFilesRecursive(
+                folderID, childPath)
 
         return result

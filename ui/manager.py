@@ -33,9 +33,9 @@ class UIManager(QtWidgets.QWidget):
             self.loginWindow.close()
             self.loginWindow = None
 
+            doAfterLoginActions()
+
         self.settingsWindow = SettingsUI(self.openLoginWindow)
         self.settingsWindow.resize(350, 400)
         self.settingsWindow.setWindowTitle("Thunderklaud Settings")
         self.settingsWindow.show()
-        
-        doAfterLoginActions()

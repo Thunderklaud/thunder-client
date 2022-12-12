@@ -10,8 +10,6 @@ class FolderSyncHandler(FileSystemEventHandler):
     @staticmethod
     def handle(event):
 
-        # print(event)
-
         if event.event_type == "moved":
             src_path = event.src_path.replace("\\", "/")
             dest_path = event.dest_path.replace("\\", "/")
@@ -28,56 +26,74 @@ class FolderSyncHandler(FileSystemEventHandler):
         folderName = getFolderName(src)
         folderPath = getFolderPath(src)
 
-        remote_folder = FolderSyncHandler.__getRemoteFolder(folderPath)
-        print(remote_folder)
+        remoteFolder = FolderSyncHandler.__getRemoteFolder(folderPath)
+        print(remoteFolder)
 
-        parent_id = ""
-        if remote_folder:
-            parent_id = remote_folder["id"]
+        parentId = ""
+        if remoteFolder:
+            parentId = remoteFolder["id"]
 
         print("create folder: " + folderName + " inside " + folderPath)
         request_url = getRequestURL("/data/directory")
         headers = getRequestHeaders()
-        data = {"parent_id": parent_id, "name": folderName}
+        data = {"parent_id": parentId, "name": folderName}
         response = requests.post(
             url=request_url, json=data, headers=headers)
 
     @staticmethod
     def __moveFolder(src, dest):
         print("move file from " + src + " to " + dest)
-        remote_folder = FolderSyncHandler.__getRemoteFolder(src)
+        remoteFolder = FolderSyncHandler.__getRemoteFolder(src)
 
         # if remote folder was found
-        if remote_folder:
-            old_folder_path = getFolderPath(src)
-            new_folder_path = getFolderPath(dest)
-            # print(old_folder_path + ":"+new_folder_path)
+        if remoteFolder:
+            oldFolderPath = getFolderPath(src)
+            newFolderPath = getFolderPath(dest)
+            print(oldFolderPath + ":"+newFolderPath)
 
-            old_folder_name = getFolderName(src)
-            new_folder_name = getFolderName(dest)
-            # print(old_folder_name + ":"+new_folder_name)
+            oldFolderName = getFolderName(src)
+            newFolderName = getFolderName(dest)
+            print(oldFolderName + ":"+newFolderName)
 
             # moved folder into another
-            if (old_folder_path != new_folder_path and old_folder_name == new_folder_name):
-                print("moved folder")
+            if (oldFolderPath != newFolderPath and oldFolderName == newFolderName):
+                print("TODO: moved folder")
             else:  # renamed folder
                 print("renamed folder")
                 request_url = getRequestURL("/data/directory")
                 headers = getRequestHeaders()
-                data = {"id": remote_folder["id"], "name": new_folder_name}
+                data = {"id": remoteFolder["id"], "name": newFolderName}
                 response = requests.patch(
                     url=request_url, json=data, headers=headers)
 
     @staticmethod
     def __getRemoteFolder(path):
-        path = removeBaseURL(path, True)
+        path = removeBaseURL(path, False)
 
         # search for sync folder by path
         syncFolders = ServerSettings.getSyncFolders(False)
 
         for syncFolder in syncFolders:
-            # print(path+":"+syncFolder["path"])
             if "path" in syncFolder and syncFolder["path"] == path:
                 return syncFolder
 
         return {}
+
+    @staticmethod
+    def deleteFolder(event):
+        print("delete folder: " + event.src_path)
+
+        src_path = event.src_path.replace("\\", "/")
+
+        remoteFolder = FolderSyncHandler.__getRemoteFolder(src_path)
+
+        if remoteFolder:
+            request_url = getRequestURL("/data/directory")
+            request_url += "?id=" + remoteFolder["id"]
+
+            headers = getRequestHeaders()
+            response = requests.delete(
+                url=request_url, json={}, headers=headers)
+        else:
+            print("ERR: deletion of " + event.src_path +
+                  " not possible. Directory not found on server")

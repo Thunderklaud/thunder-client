@@ -10,9 +10,6 @@ class FileSyncHandler(FileSystemEventHandler):
     @staticmethod
     def handle(event):
 
-        print(event)
-        print(event.event_type)
-
         if event.event_type == "moved":
             src_path = event.src_path.replace("\\", "/")
             dest_path = event.dest_path.replace("\\", "/")
@@ -24,8 +21,39 @@ class FileSyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def __createFile(src):
-        print("create file " + src)
+        print("TODO create file " + src)
 
     @staticmethod
     def __moveFile(src, dest):
-        print("move file " + src + " to " + dest)
+        print("TODO move file " + src + " to " + dest)
+
+    @staticmethod
+    def deleteFile(event):
+        print("delete file: " + event.src_path)
+
+        src_path = event.src_path.replace("\\", "/")
+
+        remoteFile = FileSyncHandler.__getRemoteFile(src_path)
+
+        if remoteFile:
+            request_url = getRequestURL("/data/file")
+            request_url += "?uuid=" + remoteFile["id"]
+
+            headers = getRequestHeaders()
+            response = requests.delete(
+                url=request_url, json={}, headers=headers)
+        else:
+            print("ERR: File deletion of " + event.src_path +
+                  " not possible, not found on the server")
+
+    @staticmethod
+    def __getRemoteFile(path):
+        path = removeBaseURL(path, True)
+
+        remoteFiles = ServerSettings.getSyncFiles()
+
+        for remotePath in remoteFiles:
+            if "path" in remotePath and remotePath["path"] == path:
+                return remotePath
+
+        return {}
