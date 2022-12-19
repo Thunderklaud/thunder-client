@@ -18,28 +18,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.createTopBar()
         self.createMainContent()
         self.createBottomBar()
-
-
-    def createDefaultSettingsJson(self):
-        defaultServerURL = "http://localhost:8080/"
-        defaultSyncFolderPath = "./test/client/"
-
-        settings = {}
-
-        settings["serverUrl"] = defaultServerURL
-        settings["syncFolderPath"] =  defaultSyncFolderPath
-        settings["syncFolders"] = []
         
-        settings = json.dumps(settings)
-        path = LocalAppManager.getLocalAppPath() + "settings.json"
-
-        jsonFile = open(path, "w")
-        jsonFile.write(settings)
-        jsonFile.close()
-
-
-
-
     def createLayouts(self):
         self.topBarLayout = QtWidgets.QHBoxLayout()
         self.topBarLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -92,7 +71,6 @@ class SettingsUI(QtWidgets.QWidget):
 
         syncDirectories = ServerSettings.getSyncDirectories()
         self.addSyncDirectoryRecursive(syncDirectories)
-
         self.refresh_button.setText("↻")
 
     def addSyncDirectoryRecursive(self, directory, level=0):
@@ -164,7 +142,7 @@ class SettingsUI(QtWidgets.QWidget):
         #LocalAppManager.saveSetting("syncFolderPath", self.getLocalSyncPathInput())
         #LocalAppManager.saveSetting("syncFolders", self.getFoldersToSave())
         
-        settings = {}
+        settings = LocalAppManager.loadSettings()
 
         settings["syncFolderPath"] =  self.getLocalSyncPathInput() 
         settings["syncFolders"] = self.getFoldersToSave()
@@ -193,10 +171,10 @@ class SettingsUI(QtWidgets.QWidget):
         self.bottomBarLayout.addWidget(notification)
 
     def getFoldersToSave(self):
-        count = self.syncFoldersLayout.count()
+        count = self.syncDirectoriesLayout.count()
         objectNames = []
         for i in range(1, count):
-            item = self.syncFoldersLayout.itemAt(i).widget()
+            item = self.syncDirectoriesLayout.itemAt(i).widget()
             if (item.isChecked()):
                 objectNames.append(item.objectName())
         return objectNames

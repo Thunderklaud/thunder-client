@@ -38,16 +38,34 @@ class LocalAppManager():
         return jwtFile.read()
 
 
+    @staticmethod
+    def createDefaultSettingsJson():
+        defaultServerURL = "http://localhost:8080/"
+        defaultSyncFolderPath = "./test/client/"
+
+        settings = {}
+
+        settings["serverUrl"] = defaultServerURL
+        settings["syncFolderPath"] =  defaultSyncFolderPath
+        settings["syncFolders"] = []
+        
+        settings = json.dumps(settings)
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+
+        jsonFile = open(path, "w")
+        jsonFile.write(settings)
+        jsonFile.close()
+
     def getSetting(key):
+
+        settings = LocalAppManager.loadSettings()
+        if key in settings:
+            return settings[key]
+
         if key == "server_url":
             return "http://localhost:8080/"
         if key == "local_sync_folder_path":
             return "./test/client/"
-            
-        settings = LocalAppManager.loadSettings()
-        setting = settings[key] 
-
-        return setting
 
     def saveSetting(key, value):
         settings = LocalAppManager.loadSettings()
