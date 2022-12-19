@@ -1,8 +1,11 @@
 import sys
+import json
 from PySide6 import QtCore, QtWidgets, QtGui
 from services.worker import Worker
 from services.serversettings import ServerSettings
+from services.localappmanager import LocalAppManager
 from services.login import logout
+from services.thundersynchandler import ThunderSyncHandler
 
 
 class SettingsUI(QtWidgets.QWidget):
@@ -15,6 +18,27 @@ class SettingsUI(QtWidgets.QWidget):
         self.createTopBar()
         self.createMainContent()
         self.createBottomBar()
+
+
+    def createDefaultSettingsJson(self):
+        defaultServerURL = "http://localhost:8080/"
+        defaultSyncFolderPath = "./test/client/"
+
+        settings = {}
+
+        settings["serverUrl"] = defaultServerURL
+        settings["syncFolderPath"] =  defaultSyncFolderPath
+        settings["syncFolders"] = []
+        
+        settings = json.dumps(settings)
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+
+        jsonFile = open(path, "w")
+        jsonFile.write(settings)
+        jsonFile.close()
+
+
+
 
     def createLayouts(self):
         self.topBarLayout = QtWidgets.QHBoxLayout()
@@ -37,31 +61,54 @@ class SettingsUI(QtWidgets.QWidget):
         self.createLogoutButton()
 
     def createMainContent(self):
-        self.createSyncFoldersArea()
+        self.createSyncDirectoriesArea()
         self.createSettingsArea()
         self.createAboutArea()
 
-    def createSyncFoldersArea(self):
-        syncFoldersBox = QtWidgets.QGroupBox("Sync Folders")
-        self.syncFoldersLayout = QtWidgets.QVBoxLayout()
+    def createSyncDirectoriesArea(self):
+        syncDirectoriesBox = QtWidgets.QGroupBox("Sync Directories")
+        self.syncDirectoriesLayout = QtWidgets.QVBoxLayout()
 
-        syncFolders = ServerSettings.getSyncFolders()
-        self.addSyncFolderRecursive(syncFolders)
+        self.refresh_button = QtWidgets.QPushButton("↻")
+        self.refresh_button.setToolTip(
+            "Fetch the newest directories from the server")
+        self.refresh_button.clicked.connect(self.addSyncDirectories)
+        self.syncDirectoriesLayout.addWidget(self.refresh_button)
 
-        syncFoldersBox.setLayout(self.syncFoldersLayout)
-        self.contentLayout.addWidget(syncFoldersBox)
+        syncDirectories = ServerSettings.getSyncDirectories()
+        self.addSyncDirectoryRecursive(syncDirectories)
 
-    def addSyncFolderRecursive(self, folder, level=0):
+        syncDirectoriesBox.setLayout(self.syncDirectoriesLayout)
+        self.contentLayout.addWidget(syncDirectoriesBox)
+
+    def addSyncDirectories(self):
+        self.refresh_button.setText("Loading...")
+
+        # remove all directories checkboxes
+        count = self.syncDirectoriesLayout.count()
+        for i in range(1, count):
+            item = self.syncDirectoriesLayout.itemAt(1).widget()
+            item.setParent(None)
+
+        syncDirectories = ServerSettings.getSyncDirectories()
+        self.addSyncDirectoryRecursive(syncDirectories)
+
+        self.refresh_button.setText("↻")
+
+    def addSyncDirectoryRecursive(self, directory, level=0):
         perLevelPadding = 7
 
-        for dir in folder:
-            checkbox = QtWidgets.QCheckBox(dir["name"], self)
+        for dir in directory:
+            checkboxLabel = dir["name"]
+
+            checkbox = QtWidgets.QCheckBox(checkboxLabel, self)
+            checkbox.setObjectName(dir["id"])
             checkbox.setStyleSheet(
                 "margin-left: " + str(level * perLevelPadding) + "px")
-            self.syncFoldersLayout.addWidget(checkbox)
+            self.syncDirectoriesLayout.addWidget(checkbox)
 
             if "children" in dir and len(dir["children"]):
-                self.addSyncFolderRecursive(dir["children"], level + 1)
+                self.addSyncDirectoryRecursive(dir["children"], level + 1)
 
     def createSettingsArea(self):
         settingsBox = QtWidgets.QGroupBox("Settings")
@@ -76,7 +123,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-        aboutLine2 = QtWidgets.QLabel("Version 1.0.0")
+        aboutLine2 = QtWidgets.QLabel("Version 1.0.2")
         self.aboutBoxLayout.addWidget(aboutLine2)
 
         aboutLine3 = QtWidgets.QLabel(
@@ -93,18 +140,36 @@ class SettingsUI(QtWidgets.QWidget):
     def createLocalSyncPathInput(self):
         rowLayout = QtWidgets.QHBoxLayout()
 
-        syncFolderPathLabel = QtWidgets.QLabel("Local Sync Folder")
-        rowLayout.addWidget(syncFolderPathLabel)
+        syncDirectoryPathLabel = QtWidgets.QLabel("Local Sync Directory")
+        rowLayout.addWidget(syncDirectoryPathLabel)
 
-        syncFolderPath = Worker.getSyncFolderPath()
-        localSynyPathInput = QtWidgets.QLineEdit(syncFolderPath)
-        rowLayout.addWidget(localSynyPathInput)
+        syncFolderPath = LocalAppManager.getSetting("local_sync_folder_path")
+        self.localSyncPathInput = QtWidgets.QLineEdit(syncFolderPath)
+        rowLayout.addWidget(self.localSyncPathInput)
 
         self.settingsBoxLayout.addLayout(rowLayout)
 
+    def getLocalSyncPathInput(self):
+        return self.localSyncPathInput.text()
+
     def createSaveButton(self):
         saveButton = QtWidgets.QPushButton("Save")
+        saveButton.clicked.connect(self.clickedSave)
         self.bottomBarLayout.addWidget(saveButton)
+
+
+
+
+    def clickedSave(self):
+        #LocalAppManager.saveSetting("syncFolderPath", self.getLocalSyncPathInput())
+        #LocalAppManager.saveSetting("syncFolders", self.getFoldersToSave())
+        
+        settings = {}
+
+        settings["syncFolderPath"] =  self.getLocalSyncPathInput() 
+        settings["syncFolders"] = self.getFoldersToSave()
+       
+        LocalAppManager.saveSettings(settings)
 
     def createLogoutButton(self):
         logoutButton = QtWidgets.QPushButton("Logout")
@@ -126,3 +191,15 @@ class SettingsUI(QtWidgets.QWidget):
         # add new notification
         notification = QtWidgets.QLabel(text)
         self.bottomBarLayout.addWidget(notification)
+
+    def getFoldersToSave(self):
+        count = self.syncFoldersLayout.count()
+        objectNames = []
+        for i in range(1, count):
+            item = self.syncFoldersLayout.itemAt(i).widget()
+            if (item.isChecked()):
+                objectNames.append(item.objectName())
+        return objectNames
+
+    def closeEvent(self, event):
+        ThunderSyncHandler.RUNNING = False

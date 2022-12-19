@@ -1,72 +1,110 @@
 import requests
-from services.localappmanager import LocalAppManager
-from config import Config
+from utils.file import uniqueDirectoryPath, uniqueFilePath
+from utils.request import getRequestURL, getRequestHeaders
 
 
 class ServerSettings():
 
     @staticmethod
-    def getSyncFolders():
-        # add folders to test
-        # ServerSettings.__addTestFolders()
-
-        folders = ServerSettings.__getFolderRecursive()
-        print(folders)
-        print("END")
-        return folders
+    def getSyncDirectories(multidimensionalArray=True):
+        directories = ServerSettings.__getDirectoryRecursive(
+            None, "", multidimensionalArray)
+        return directories
 
     @staticmethod
-    def __getFolderRecursive(parent_id=None):
+    def getSyncFiles():
+        files = ServerSettings.__getFilesRecursive(None, "")
+        return files
+
+    @staticmethod
+    def __getDirectoryRecursive(parentId=None, path="", multidimensionalArray=True):
         result = []
 
-        jwt = LocalAppManager.readLocalJWT()
-        headers = {"Content-Type": "application/json",
-                   "Authorization": "Bearer {}".format(jwt)}
-        requestURL = LocalAppManager.getSetting(
-            "server_url") + Config.API_VERSION + "/data/directory"
+        # do server request
+        request_url = getRequestURL("/data/directory")
+        headers = getRequestHeaders()
 
         # build request data
-        if parent_id is not None:
-            data = '{"id": "' + str(parent_id) + '"}'
-        else:
-            data = '{}'
+        if parentId is not None:
+            request_url += "?id=" + str(parentId)
 
-        response = requests.get(url=requestURL, data=data, headers=headers)
+        response = requests.get(url=request_url, json={}, headers=headers)
 
-        # DEBUG
-        print("request" + data)
-        # END DEBUG
-
+        # handle response
         if response.status_code != 200:
             return []
-
         jsonResponse = response.json()
-        jsonResult = jsonResponse["result"]
-        dirs = jsonResult["dirs"]
+        dirs = jsonResponse["dirs"]
+        fileCount = len(jsonResponse["files"])
 
+        # loop the result
         for dir in dirs:
-            folder = {}
-            folderID = dir["id"]["$oid"]
-            folderName = dir["name"]
+            directory = {}
+            directoryID = dir["id"]["$oid"]
+            directoryName = dir["name"]
 
-            folder["id"] = folderID
-            folder["name"] = folderName
-            folder["children"] = ServerSettings.__getFolderRecursive(folderID)
+            childPath = uniqueDirectoryPath(path + "/" + directoryName)
 
-            result.append(folder)
+            directory["id"] = directoryID
+            directory["name"] = directoryName
+            directory["path"] = childPath
+
+            directoryChildren = ServerSettings.__getDirectoryRecursive(
+                directoryID, childPath, multidimensionalArray)
+
+            # set children as variable
+            if multidimensionalArray:
+                directory["children"] = directoryChildren
+            else:
+                # add children to arrays root level
+                result += directoryChildren
+
+            result.append(directory)
 
         return result
 
     @staticmethod
-    def __addTestFolders():
-        jwt = LocalAppManager.readLocalJWT()
-        headers = {"Content-Type": "application/json",
-                   "Authorization": "Bearer {}".format(jwt)}
-        requestURL = LocalAppManager.getSetting(
-            "server_url") + Config.API_VERSION + "/data/directory"
-        res = requests.post(
-            url=requestURL, data='{"name": "Doc"}', headers=headers)
-        res = requests.post(
-            url=requestURL, data='{"name": "Doc 2"}', headers=headers)
-        res = requests.post(
-            url=requestURL, data='{"name": "Doc 3"}', headers=headers)
+    def __getFilesRecursive(parentId=None, path=""):
+        result = []
+
+        # do server request
+        request_url = getRequestURL("/data/directory")
+        headers = getRequestHeaders()
+
+        # build request data
+        if parentId is not None:
+            request_url += "?id=" + str(parentId)
+
+        response = requests.get(url=request_url, json={}, headers=headers)
+
+        # handle response
+        if response.status_code != 200:
+            return []
+        jsonResponse = response.json()
+        files = jsonResponse["files"]
+        dirs = jsonResponse["dirs"]
+
+        # download files
+        if len(files):
+            for loopFile in files:
+                file = {}
+
+                fileID = loopFile["uuid"]
+                fileName = loopFile["name"]
+
+                file["id"] = fileID
+                file["name"] = fileName
+                file["path"] = uniqueFilePath(path + "/" + fileName)
+                result.append(file)
+
+        # loop the result
+        for dir in dirs:
+            directory = dir["id"]["$oid"]
+            directoryName = dir["name"]
+
+            childPath = uniqueDirectoryPath(path + "/" + directoryName)
+
+            result += ServerSettings.__getFilesRecursive(
+                directory, childPath)
+
+        return result

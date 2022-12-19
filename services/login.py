@@ -1,37 +1,47 @@
 import requests
-from hashlib import sha256 
+from hashlib import sha256
 from services.localappmanager import LocalAppManager
+from services.thundersynchandler import ThunderSyncHandler
+from services.worker import Worker
+from utils.request import getRequestHeaders, getRequestURL
 
 
 def isLoggedIn():
-    jwt = LocalAppManager.readLocalJWT()
-    headers = {"Authorization": "Bearer {}".format(jwt)}
-    response = requests.get(
-        "http://localhost:8080/v1/user/test", headers=headers)
+    headers = getRequestHeaders()
+    requestURL = getRequestURL("/user/test")
+    response = requests.get(url=requestURL, headers=headers)
+
     return response.status_code == 200
 
 
 def register(firstname, lastname, email, password):
     pwHash = hashPassword(password)
+
+    requestURL = getRequestURL("/user/registration")
     registerData = {"firstname": firstname,
                     "lastname": lastname, "email": email, "pw_hash": pwHash}
-    r = requests.post(
-        "http://localhost:8080/v1/user/registration", json=registerData)
-    print(r.json())
+    requests.post(url=requestURL, json=registerData)
 
 
 def login(email, password, openSetingsScreen):
     pwHash = hashPassword(password)
+
+    requestURL = getRequestURL("/user/login")
     loginData = {"email": email, "pw_hash": pwHash}
-    response = requests.post(
-        "http://localhost:8080/v1/user/login", json=loginData)
+    response = requests.post(url=requestURL, json=loginData)
+
+    # handle server error response
+    if response.status_code != 200:
+        return "Login failed: " + response.text
 
     jsonResponse = response.json()
-    if jsonResponse["status"] == False:
-        return "Login failed: " + str(jsonResponse["error"])
 
-    print(response.json())
-    jwt = response.json()["result"]["jwt"]
+    # handle unknown user
+    if "status" in jsonResponse and not jsonResponse.status:
+        return "Login failed: " + response.error
+
+    # handle jwt and open settings window
+    jwt = response.json()["jwt"]
     LocalAppManager.saveJWTLocally(jwt)
     openSetingsScreen()
 
@@ -39,10 +49,11 @@ def login(email, password, openSetingsScreen):
 
 
 def logout(openLoginScreen):
-    jwt = LocalAppManager.readLocalJWT()
-    headers = {"Authorization": "Bearer {}".format(jwt)}
-    response = requests.post(
-        "http://localhost:8080/v1/user/logout", headers=headers)
+    headers = getRequestHeaders()
+    requestURL = getRequestURL("/user/logout")
+    response = requests.post(url=requestURL, headers=headers)
+
+    # remove local jwt and open login window
     if response.status_code == 200:
         LocalAppManager.removeJWTLocally()
         openLoginScreen()
@@ -52,4 +63,12 @@ def logout(openLoginScreen):
 
 def hashPassword(string):
     return str(sha256(string.encode('utf-8')).hexdigest())
-    
+
+
+def doAfterLoginActions():
+    if isLoggedIn():
+        worker = Worker()
+        worker.start()
+
+        sync_handler = ThunderSyncHandler()
+        sync_handler.run()
