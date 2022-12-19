@@ -45,6 +45,8 @@ def login(email, password, openSetingsScreen):
     LocalAppManager.saveJWTLocally(jwt)
     openSetingsScreen()
 
+    
+
 
 def logout(openLoginScreen):
     headers = getRequestHeaders()
@@ -58,7 +60,6 @@ def logout(openLoginScreen):
         return True
 
     return False
-
 
 def hashPassword(string):
     return str(sha256(string.encode('utf-8')).hexdigest())
