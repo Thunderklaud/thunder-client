@@ -29,6 +29,7 @@ class FileSyncHandler(FileSystemEventHandler):
         # get current directory
         directoryPath = getDirectoryPath(src)
         remoteDirectory = FileSyncHandler.__getRemoteDirectory(directoryPath)
+        print(remoteDirectory)
 
         if remoteDirectory:
             # get created file
@@ -65,7 +66,6 @@ class FileSyncHandler(FileSystemEventHandler):
         print("delete file: " + src_path)
 
         remoteFile = FileSyncHandler.__getRemoteFile(src_path)
-        print(remoteFile)
 
         if remoteFile:
             request_url = getRequestURL("/data/file")
@@ -102,7 +102,7 @@ class FileSyncHandler(FileSystemEventHandler):
         FileSyncHandler.deleteFile(event)
 
         # upload new file
-        # FileSyncHandler.__createFile(src_path)
+        FileSyncHandler.__createFile(src_path)
 
     @staticmethod
     def __getRemoteDirectory(path):

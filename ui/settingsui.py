@@ -5,6 +5,7 @@ from services.worker import Worker
 from services.serversettings import ServerSettings
 from services.localappmanager import LocalAppManager
 from services.login import logout
+from services.thundersynchandler import ThunderSyncHandler
 
 
 class SettingsUI(QtWidgets.QWidget):
@@ -77,8 +78,9 @@ class SettingsUI(QtWidgets.QWidget):
         perLevelPadding = 7
 
         for dir in directory:
-            checkbox = QtWidgets.QCheckBox(
-                dir["name"] + " (" + str(dir["fileCount"]) + " files)", self)
+            checkboxLabel = dir["name"]
+
+            checkbox = QtWidgets.QCheckBox(checkboxLabel, self)
             checkbox.setObjectName(dir["id"])
             checkbox.setStyleSheet(
                 "margin-left: " + str(level * perLevelPadding) + "px")
@@ -175,3 +177,6 @@ class SettingsUI(QtWidgets.QWidget):
             if (item.isChecked()):
                 objectNames.append(item.objectName())
         return objectNames
+
+    def closeEvent(self, event):
+        ThunderSyncHandler.RUNNING = False

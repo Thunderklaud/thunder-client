@@ -3,7 +3,7 @@ from services.localappmanager import LocalAppManager
 
 def remoteFileOrDirectoryExists(directories, path):
     for directory in directories:
-        if "path" in directory and directory["path"] == path:
+        if directory["path"] == path:
             return True
 
     return False

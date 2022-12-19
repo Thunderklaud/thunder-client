@@ -48,7 +48,6 @@ class ServerSettings():
             directory["id"] = directoryID
             directory["name"] = directoryName
             directory["path"] = childPath
-            directory["fileCount"] = fileCount
 
             directoryChildren = ServerSettings.__getDirectoryRecursive(
                 directoryID, childPath, multidimensionalArray)

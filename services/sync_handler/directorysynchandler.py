@@ -64,7 +64,7 @@ class DirectorySyncHandler(FileSystemEventHandler):
                 request_url = getRequestURL("/data/directory")
                 headers = getRequestHeaders()
                 data = {"id": remoteDirectory["id"], "name": directoryName}
-                response = requests.patch(
+                requests.patch(
                     url=request_url, json=data, headers=headers)
 
     @staticmethod

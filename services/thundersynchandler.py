@@ -13,6 +13,8 @@ from utils.file import removeBaseURL
 
 class ThunderSyncHandler:
 
+    RUNNING = False
+
     def __init__(self):
         self.observer = Observer()
         self.observer_directory = LocalAppManager.getSetting(
@@ -33,7 +35,7 @@ class ThunderSyncHandler:
         # self.observer.daemon = True
         self.observer.start()
         try:
-            while True:
+            while ThunderSyncHandler.RUNNING:
                 time.sleep(3)
         except:
             self.observer.stop()
