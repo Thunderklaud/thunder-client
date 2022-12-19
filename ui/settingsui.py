@@ -77,9 +77,9 @@ class SettingsUI(QtWidgets.QWidget):
         perLevelPadding = 7
 
         for dir in directory:
-            checkbox = QtWidgets.QCheckBox(dir["name"], self)
+            checkbox = QtWidgets.QCheckBox(
+                dir["name"] + " (" + str(dir["fileCount"]) + " files)", self)
             checkbox.setObjectName(dir["id"])
-            print(checkbox.objectName())
             checkbox.setStyleSheet(
                 "margin-left: " + str(level * perLevelPadding) + "px")
             self.syncDirectoriesLayout.addWidget(checkbox)
@@ -135,13 +135,12 @@ class SettingsUI(QtWidgets.QWidget):
     def clickedSave(self):
         settings = {}
 
-        settings["syncFolderPath"] =  LocalAppManager.getSetting("local_sync_folder_path")
+        settings["syncFolderPath"] = LocalAppManager.getSetting(
+            "local_sync_folder_path")
         settings["syncFolders"] = self.getFoldersToSave()
-       
+
         settings = json.dumps(settings)
         path = LocalAppManager.getLocalAppPath() + "settings.json"
-
-        
 
         jsonFile = open(path, "w")
         jsonFile.write(settings)
@@ -173,8 +172,6 @@ class SettingsUI(QtWidgets.QWidget):
         objectNames = []
         for i in range(1, count):
             item = self.syncFoldersLayout.itemAt(i).widget()
-            if(item.isChecked()):
+            if (item.isChecked()):
                 objectNames.append(item.objectName())
         return objectNames
-
-

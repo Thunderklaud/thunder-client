@@ -35,6 +35,7 @@ class ServerSettings():
             return []
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
+        fileCount = len(jsonResponse["files"])
 
         # loop the result
         for dir in dirs:
@@ -47,6 +48,7 @@ class ServerSettings():
             directory["id"] = directoryID
             directory["name"] = directoryName
             directory["path"] = childPath
+            directory["fileCount"] = fileCount
 
             directoryChildren = ServerSettings.__getDirectoryRecursive(
                 directoryID, childPath, multidimensionalArray)

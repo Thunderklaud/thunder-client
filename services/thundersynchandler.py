@@ -30,7 +30,7 @@ class ThunderSyncHandler:
         self.observer.schedule(
             event_handler, self.observer_directory, recursive=True)
 
-        self.observer.daemon = True
+        # self.observer.daemon = True
         self.observer.start()
         try:
             while True:

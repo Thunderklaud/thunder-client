@@ -43,7 +43,7 @@ class DirectorySyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def __moveDirectory(src, dest):
-        print("move file from " + src + " to " + dest)
+        print("move directory from " + src + " to " + dest)
         remoteDirectory = DirectorySyncHandler.__getRemoteDirectory(src)
 
         # if remote directory was found
