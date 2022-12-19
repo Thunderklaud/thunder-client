@@ -1,12 +1,14 @@
 import shutil
 import os
 import io
+import datetime
 from glob import iglob
 from services.localappmanager import LocalAppManager
 import requests
 from config import Config
 from utils.file import uniqueDirectoryPath, uniqueFilePath, remoteFileOrDirectoryExists, removeBaseURL
 from utils.request import getRequestURL, getRequestHeaders
+from services.sync_handler.filesynchandler import FileSyncHandler
 
 
 class Worker:
@@ -49,7 +51,7 @@ class Worker:
         # download files
         if len(files):
             for file in files:
-                fileResult = Worker.__downloadFile(self, file, path)
+                fileResult = Worker.__handleFile(self, file, path)
                 result.append(fileResult)
 
         # loop dirs
@@ -76,7 +78,8 @@ class Worker:
         return result
 
     @staticmethod
-    def __downloadFile(self, file, path):
+    def __handleFile(self, file, path):
+
         fileResult = {}
 
         fileID = file["uuid"]
@@ -88,6 +91,30 @@ class Worker:
         fileResult["name"] = fileName
         fileResult["path"] = uniqueFilePath(path + "/" + fileName)
 
+        # if local file does not exists => download
+        if not os.path.isfile(filePath):
+            Worker.__downloadFile(fileID, filePath)
+
+        else:   # check dates for newer file
+
+            # compare modified dates
+            remoteModifiedDate = float(
+                file["creation_date"]["$date"]["$numberLong"]) / 1000  # * 1000 to get timestamp in seconds
+            localModifiedDate = float(os.path.getmtime(filePath))
+
+            # if remote modified date is newer => download file, else upload file
+            print(str(remoteModifiedDate) + ":"+str(localModifiedDate))
+            if remoteModifiedDate > localModifiedDate:
+                print("worker: download " + filePath)
+                Worker.__downloadFile(fileID, filePath)
+            else:
+                print("worker: upload " + filePath)
+                FileSyncHandler.createFile(filePath)
+
+        return fileResult
+
+    @staticmethod
+    def __downloadFile(fileID, filePath):
         # do server request
         request_url = getRequestURL("/data/download/file")
         headers = getRequestHeaders()
@@ -104,8 +131,6 @@ class Worker:
             fileHandle.close()
         except PermissionError:
             print("[ERR] Permission denied")
-
-        return fileResult
 
     @staticmethod
     def __deleteFilesAndDirectoriessNotOnServer(self):

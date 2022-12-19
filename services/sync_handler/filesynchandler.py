@@ -17,13 +17,13 @@ class FileSyncHandler(FileSystemEventHandler):
 
         if event.event_type == "created":
             src_path = event.src_path.replace("\\", "/")
-            FileSyncHandler.__createFile(src_path)
+            FileSyncHandler.createFile(src_path)
 
         if event.event_type == "modified":
             FileSyncHandler.__modifyFile(event)
 
     @staticmethod
-    def __createFile(src):
+    def createFile(src):
         print("create file: " + src)
 
         # get current directory
@@ -96,13 +96,13 @@ class FileSyncHandler(FileSystemEventHandler):
     @staticmethod
     def __modifyFile(event):
         src_path = event.src_path.replace("\\", "/")
-        print("modify file (delete and upload): " + src_path)
+        print("modify file (delete and create): " + src_path)
 
         # delete old file
         FileSyncHandler.deleteFile(event)
 
-        # upload new file
-        FileSyncHandler.__createFile(src_path)
+        # create new file
+        FileSyncHandler.createFile(src_path)
 
     @staticmethod
     def __getRemoteDirectory(path):
