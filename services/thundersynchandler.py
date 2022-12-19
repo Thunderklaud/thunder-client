@@ -7,7 +7,7 @@ from watchdog.events import FileSystemEventHandler
 from services.sync_handler.directorysynchandler import DirectorySyncHandler
 from services.sync_handler.filesynchandler import FileSyncHandler
 from services.localappmanager import LocalAppManager
-from services.serversettings import ServerSettings
+from services.server_settings import ServerSettings
 from utils.file import removeBaseURL
 
 

@@ -11,7 +11,7 @@ from utils.request import getRequestURL, getRequestHeaders
 from services.sync_handler.filesynchandler import FileSyncHandler
 
 
-class Worker:
+class StartupSyncer:
 
     def start(self):
         self.syncDirectoryPath = LocalAppManager.getSetting(
@@ -22,11 +22,11 @@ class Worker:
             os.makedirs(self.syncDirectoryPath)
 
         # create local directories
-        self.remoteFilesAndDirectories = Worker.__downloadRemoteContentRecursive(
+        self.remoteFilesAndDirectories = StartupSyncer.__downloadRemoteContentRecursive(
             self)
 
         # delete local directories that does not exists on the server
-        Worker.__deleteFilesAndDirectoriessNotOnServer(self)
+        StartupSyncer.__deleteFilesAndDirectoriessNotOnServer(self)
 
     @staticmethod
     def __downloadRemoteContentRecursive(self, parent_id=None, path=""):
@@ -51,7 +51,7 @@ class Worker:
         # download files
         if len(files):
             for file in files:
-                fileResult = Worker.__handleFile(self, file, path)
+                fileResult = StartupSyncer.__handleFile(self, file, path)
                 result.append(fileResult)
 
         # loop dirs
@@ -70,8 +70,8 @@ class Worker:
             directory["id"] = directoryID
             directory["name"] = directoryName
             directory["path"] = childPath
-            result += Worker.__downloadRemoteContentRecursive(self,
-                                                              directoryID, childPath)
+            result += StartupSyncer.__downloadRemoteContentRecursive(self,
+                                                                     directoryID, childPath)
 
             result.append(directory)
 
@@ -93,7 +93,7 @@ class Worker:
 
         # if local file does not exists => download
         if not os.path.isfile(filePath):
-            Worker.__downloadFile(fileID, filePath)
+            StartupSyncer.__downloadFile(fileID, filePath)
 
         else:   # check dates for newer file
 
@@ -104,10 +104,10 @@ class Worker:
 
             # if remote modified date is newer => download file, else upload file
             if remoteModifiedDate > localModifiedDate:
-                print("worker: download " + filePath)
-                Worker.__downloadFile(fileID, filePath)
+                print("StartupSync: download " + filePath)
+                StartupSyncer.__downloadFile(fileID, filePath)
             else:
-                print("worker: upload " + filePath)
+                print("StartupSync: upload " + filePath)
                 FileSyncHandler.createFile(filePath)
 
         return fileResult

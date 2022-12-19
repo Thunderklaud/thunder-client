@@ -27,6 +27,7 @@ def uniqueDirectoryPath(path):
         path = "/" + path
 
     # TODO: remove double slashes
+    path = path.replace("//", "/")
 
     return path
 

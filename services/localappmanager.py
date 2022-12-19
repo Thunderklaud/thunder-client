@@ -37,7 +37,6 @@ class LocalAppManager():
         jwtFile = open(localJWTPath, "r")
         return jwtFile.read()
 
-
     @staticmethod
     def createDefaultSettingsJson():
         defaultServerURL = "http://localhost:8080/"
@@ -46,9 +45,9 @@ class LocalAppManager():
         settings = {}
 
         settings["serverUrl"] = defaultServerURL
-        settings["syncFolderPath"] =  defaultSyncFolderPath
+        settings["syncFolderPath"] = defaultSyncFolderPath
         settings["syncFolders"] = []
-        
+
         settings = json.dumps(settings)
         path = LocalAppManager.getLocalAppPath() + "settings.json"
 
@@ -56,6 +55,7 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    @staticmethod
     def getSetting(key):
 
         settings = LocalAppManager.loadSettings()
@@ -67,6 +67,7 @@ class LocalAppManager():
         if key == "local_sync_folder_path":
             return "./test/client/"
 
+    @staticmethod
     def saveSetting(key, value):
         settings = LocalAppManager.loadSettings()
         settings[key] = value
@@ -77,6 +78,7 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    @staticmethod
     def saveSettings(settings):
         settings = json.dumps(settings)
         path = LocalAppManager.getLocalAppPath() + "settings.json"
@@ -85,14 +87,21 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    @staticmethod
     def loadSettings():
         path = LocalAppManager.getLocalAppPath() + "settings.json"
         jsonFile = open(path, "r")
         settings = {}
         settings = json.load(jsonFile)
         jsonFile.close()
-        return settings    
+        return settings
 
+    @staticmethod
     def removeJWTLocally():
         localJWTPath = LocalAppManager.getLocalJWTPath()
         os.remove(localJWTPath)
+
+    @staticmethod
+    def doStartupActions():
+        LocalAppManager.createLocalAppPathIfNotExists()
+        LocalAppManager.createDefaultSettingsJson()

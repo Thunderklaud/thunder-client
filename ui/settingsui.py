@@ -1,8 +1,7 @@
 import sys
 import json
-from PySide6 import QtCore, QtWidgets, QtGui
-from services.worker import Worker
-from services.serversettings import ServerSettings
+from PySide6 import QtCore, QtWidgets
+from services.server_settings import ServerSettings
 from services.localappmanager import LocalAppManager
 from services.login import logout
 from services.thundersynchandler import ThunderSyncHandler
@@ -18,7 +17,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.createTopBar()
         self.createMainContent()
         self.createBottomBar()
-        
+
     def createLayouts(self):
         self.topBarLayout = QtWidgets.QHBoxLayout()
         self.topBarLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -135,18 +134,12 @@ class SettingsUI(QtWidgets.QWidget):
         saveButton.clicked.connect(self.clickedSave)
         self.bottomBarLayout.addWidget(saveButton)
 
-
-
-
     def clickedSave(self):
-        #LocalAppManager.saveSetting("syncFolderPath", self.getLocalSyncPathInput())
-        #LocalAppManager.saveSetting("syncFolders", self.getFoldersToSave())
-        
         settings = LocalAppManager.loadSettings()
 
-        settings["syncFolderPath"] =  self.getLocalSyncPathInput() 
+        settings["syncFolderPath"] = self.getLocalSyncPathInput()
         settings["syncFolders"] = self.getFoldersToSave()
-       
+
         LocalAppManager.saveSettings(settings)
 
     def createLogoutButton(self):

@@ -1,6 +1,6 @@
 import requests
 from watchdog.events import FileSystemEventHandler
-from services.serversettings import ServerSettings
+from services.server_settings import ServerSettings
 from utils.request import getRequestURL, getRequestHeaders
 from utils.file import removeBaseURL, getDirectoryOrFileName, getDirectoryPath
 

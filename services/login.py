@@ -2,7 +2,7 @@ import requests
 from hashlib import sha256
 from services.localappmanager import LocalAppManager
 from services.thundersynchandler import ThunderSyncHandler
-from services.worker import Worker
+from services.startup_syncer import StartupSyncer
 from utils.request import getRequestHeaders, getRequestURL
 
 
@@ -45,8 +45,6 @@ def login(email, password, openSetingsScreen):
     LocalAppManager.saveJWTLocally(jwt)
     openSetingsScreen()
 
-    
-
 
 def logout(openLoginScreen):
     headers = getRequestHeaders()
@@ -61,14 +59,15 @@ def logout(openLoginScreen):
 
     return False
 
+
 def hashPassword(string):
     return str(sha256(string.encode('utf-8')).hexdigest())
 
 
 def doAfterLoginActions():
     if isLoggedIn():
-        worker = Worker()
-        worker.start()
+        startupSyncer = StartupSyncer()
+        startupSyncer.start()
 
         sync_handler = ThunderSyncHandler()
         sync_handler.run()
