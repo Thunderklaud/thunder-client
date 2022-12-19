@@ -18,6 +18,7 @@ if __name__ == "__main__":
     # init UI
     uimanager = UIManager()
     uimanager.createUI(loggedIn)
+    uimanager.setIcon(app)
 
     # start background worker when user is logged in on startup
     doAfterLoginActions()
