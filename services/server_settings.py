@@ -17,7 +17,7 @@ class ServerSettings():
         return files
 
     @staticmethod
-    def __getDirectoryRecursive(parentId=None, path="", multidimensionalArray=True):
+    def __getDirectoryRecursive(parentId=None, recPath="", multidimensionalArray=True):
         result = []
 
         # do server request
@@ -35,7 +35,6 @@ class ServerSettings():
             return []
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
-        fileCount = len(jsonResponse["files"])
 
         # loop the result
         for dir in dirs:
@@ -43,7 +42,8 @@ class ServerSettings():
             directoryID = dir["id"]["$oid"]
             directoryName = dir["name"]
 
-            childPath = uniqueDirectoryPath(path + "/" + directoryName)
+            childPath = uniqueDirectoryPath(
+                recPath + "/" + directoryName)
 
             directory["id"] = directoryID
             directory["name"] = directoryName

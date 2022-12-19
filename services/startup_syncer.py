@@ -8,7 +8,7 @@ import requests
 from config import Config
 from utils.file import uniqueDirectoryPath, uniqueFilePath, remoteFileOrDirectoryExists, removeBaseURL
 from utils.request import getRequestURL, getRequestHeaders
-from services.sync_handler.filesynchandler import FileSyncHandler
+from services.sync_handlers.filesynchandler import FileSyncHandler
 
 
 class StartupSyncer:
@@ -16,6 +16,8 @@ class StartupSyncer:
     def start(self):
         self.syncDirectoryPath = LocalAppManager.getSetting(
             "local_sync_folder_path")
+        print("[INFO] Sync local folder '" +
+              self.syncDirectoryPath + "' with remote server")
 
         # create sync directory if not exists
         if not os.path.isdir(self.syncDirectoryPath):
@@ -27,6 +29,8 @@ class StartupSyncer:
 
         # delete local directories that does not exists on the server
         StartupSyncer.__deleteFilesAndDirectoriessNotOnServer(self)
+
+        print("[INFO] Sync local folder done")
 
     @staticmethod
     def __downloadRemoteContentRecursive(self, parent_id=None, path=""):
@@ -104,10 +108,8 @@ class StartupSyncer:
 
             # if remote modified date is newer => download file, else upload file
             if remoteModifiedDate > localModifiedDate:
-                print("StartupSync: download " + filePath)
                 StartupSyncer.__downloadFile(fileID, filePath)
             else:
-                print("StartupSync: upload " + filePath)
                 FileSyncHandler.createFile(filePath)
 
         return fileResult
@@ -161,4 +163,3 @@ class StartupSyncer:
                             self.syncDirectoryPath + path)
                         if os.path.exists(fullPath):
                             os.remove(fullPath)
-                        print("delete file " + path)

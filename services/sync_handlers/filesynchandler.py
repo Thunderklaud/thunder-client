@@ -2,7 +2,7 @@ import requests
 from watchdog.events import FileSystemEventHandler
 from services.server_settings import ServerSettings
 from utils.request import getRequestURL, getRequestHeaders
-from utils.file import removeBaseURL, getDirectoryOrFileName, getDirectoryPath
+from utils.file import removeBaseURL, getDirectoryOrFileName, getDirectoryPath, uniqueFilePath
 
 
 class FileSyncHandler(FileSystemEventHandler):
@@ -10,30 +10,33 @@ class FileSyncHandler(FileSystemEventHandler):
     @staticmethod
     def handle(event):
 
+        # handle file RENAME
         if event.event_type == "moved":
-            src_path = event.src_path.replace("\\", "/")
-            dest_path = event.dest_path.replace("\\", "/")
+            src_path = uniqueFilePath(event.src_path)
+            dest_path = uniqueFilePath(event.dest_path)
             FileSyncHandler.__renameFile(src_path, dest_path)
 
+        # handle file CREATE
         if event.event_type == "created":
-            src_path = event.src_path.replace("\\", "/")
+            src_path = uniqueFilePath(event.src_path)
             FileSyncHandler.createFile(src_path)
 
+        # handle file MODIFY
         if event.event_type == "modified":
-            FileSyncHandler.__modifyFile(event)
+            src_path = uniqueFilePath(event.src_path)
+            FileSyncHandler.__modifyFile(src_path)
 
     @staticmethod
     def createFile(src):
-        print("create file: " + src)
+        print("[INFO] Create file: " + src)
 
         # get current directory
         directoryPath = getDirectoryPath(src)
         remoteDirectory = FileSyncHandler.__getRemoteDirectory(directoryPath)
-        print(remoteDirectory)
 
         if remoteDirectory:
-            # get created file
-            files = {"file": open(src, "rb")}
+            fileHandle = open(src, "rb")
+            files = {"file": fileHandle}
 
             request_url = getRequestURL("/data/file")
             request_url += "?directory=" + remoteDirectory["id"]
@@ -41,12 +44,17 @@ class FileSyncHandler(FileSystemEventHandler):
             headers = getRequestHeaders(True, "")
             requests.put(
                 url=request_url, files=files, headers=headers)
+
+            fileHandle.close()
         else:
-            print("ERR: remote directory not found")
+            print("[ERR] Remote directory not found: " +
+                  directoryPath + ", skip file")
+
+        print("[INFO] Create file done.")
 
     @staticmethod
     def __renameFile(src, dest):
-        print("renamed file " + src + " to " + dest)
+        print("[INFO] Rename file " + src + " to " + dest)
 
         remoteFile = FileSyncHandler.__getRemoteFile(src)
 
@@ -54,16 +62,19 @@ class FileSyncHandler(FileSystemEventHandler):
             newName = getDirectoryOrFileName(dest)
             request_url = getRequestURL("/data/file")
 
+            # body data
             data = {"uuid": remoteFile["id"], "new_name": newName}
 
             headers = getRequestHeaders()
             requests.patch(
                 url=request_url, json=data, headers=headers)
 
+        print("[INFO] Renamed file done.")
+
     @staticmethod
-    def deleteFile(event):
-        src_path = event.src_path.replace("\\", "/")
-        print("delete file: " + src_path)
+    def deleteFile(src_path):
+        src_path = src_path.replace("\\", "/")
+        print("[INFO] Delete file: " + src_path)
 
         remoteFile = FileSyncHandler.__getRemoteFile(src_path)
 
@@ -76,10 +87,25 @@ class FileSyncHandler(FileSystemEventHandler):
                 url=request_url, json={}, headers=headers)
 
             if response.status_code == 404:
-                print("INFO: file not on remote file system")
+                print("[ERR]: file not on remote file system")
         else:
-            print("ERR: File deletion of " + src_path +
+            print("[ERR] File deletion of " + src_path +
                   " not possible, not found on the server")
+
+        print("[INFO] Delete file done.")
+
+    @staticmethod
+    def __modifyFile(src_path):
+        src_path = src_path.replace("\\", "/")
+        print("[INFO] Modify file (delete and create): " + src_path)
+
+        # delete old file
+        FileSyncHandler.deleteFile(src_path)
+
+        # create new file
+        FileSyncHandler.createFile(src_path)
+
+        print("[INFO] Modify file (delete and create) done.")
 
     @staticmethod
     def __getRemoteFile(path):
@@ -93,26 +119,16 @@ class FileSyncHandler(FileSystemEventHandler):
 
         return {}
 
+    # same as __getRemoteDirectory() in DirectorySyncHandler
     @staticmethod
-    def __modifyFile(event):
-        src_path = event.src_path.replace("\\", "/")
-        print("modify file (delete and create): " + src_path)
-
-        # delete old file
-        FileSyncHandler.deleteFile(event)
-
-        # create new file
-        FileSyncHandler.createFile(src_path)
-
-    @staticmethod
-    def __getRemoteDirectory(path):
-        path = removeBaseURL(path, False)
+    def __getRemoteDirectory(dir_path):
+        dir_path = removeBaseURL(dir_path, False)
 
         # search for sync directory by path
         syncDirectories = ServerSettings.getSyncDirectories(False)
 
         for syncDirectory in syncDirectories:
-            if "path" in syncDirectory and syncDirectory["path"] == path:
+            if "path" in syncDirectory and syncDirectory["path"] == dir_path:
                 return syncDirectory
 
         return {}
