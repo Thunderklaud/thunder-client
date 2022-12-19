@@ -19,6 +19,27 @@ class SettingsUI(QtWidgets.QWidget):
         self.createMainContent()
         self.createBottomBar()
 
+
+    def createDefaultSettingsJson(self):
+        defaultServerURL = "http://localhost:8080/"
+        defaultSyncFolderPath = "./test/client/"
+
+        settings = {}
+
+        settings["serverUrl"] = defaultServerURL
+        settings["syncFolderPath"] =  defaultSyncFolderPath
+        settings["syncFolders"] = []
+        
+        settings = json.dumps(settings)
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+
+        jsonFile = open(path, "w")
+        jsonFile.write(settings)
+        jsonFile.close()
+
+
+
+
     def createLayouts(self):
         self.topBarLayout = QtWidgets.QHBoxLayout()
         self.topBarLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -122,31 +143,33 @@ class SettingsUI(QtWidgets.QWidget):
         syncDirectoryPathLabel = QtWidgets.QLabel("Local Sync Directory")
         rowLayout.addWidget(syncDirectoryPathLabel)
 
-        syncDirectoryPath = LocalAppManager.getSetting(
-            "local_sync_folder_path")
-        localSynyPathInput = QtWidgets.QLineEdit(syncDirectoryPath)
-        rowLayout.addWidget(localSynyPathInput)
+        syncFolderPath = LocalAppManager.getSetting("local_sync_folder_path")
+        self.localSyncPathInput = QtWidgets.QLineEdit(syncFolderPath)
+        rowLayout.addWidget(self.localSyncPathInput)
 
         self.settingsBoxLayout.addLayout(rowLayout)
+
+    def getLocalSyncPathInput(self):
+        return self.localSyncPathInput.text()
 
     def createSaveButton(self):
         saveButton = QtWidgets.QPushButton("Save")
         saveButton.clicked.connect(self.clickedSave)
         self.bottomBarLayout.addWidget(saveButton)
 
+
+
+
     def clickedSave(self):
+        #LocalAppManager.saveSetting("syncFolderPath", self.getLocalSyncPathInput())
+        #LocalAppManager.saveSetting("syncFolders", self.getFoldersToSave())
+        
         settings = {}
 
-        settings["syncFolderPath"] = LocalAppManager.getSetting(
-            "local_sync_folder_path")
+        settings["syncFolderPath"] =  self.getLocalSyncPathInput() 
         settings["syncFolders"] = self.getFoldersToSave()
-
-        settings = json.dumps(settings)
-        path = LocalAppManager.getLocalAppPath() + "settings.json"
-
-        jsonFile = open(path, "w")
-        jsonFile.write(settings)
-        jsonFile.close()
+       
+        LocalAppManager.saveSettings(settings)
 
     def createLogoutButton(self):
         logoutButton = QtWidgets.QPushButton("Logout")

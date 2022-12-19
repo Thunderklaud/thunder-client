@@ -1,5 +1,6 @@
 from pathlib import Path
 import os
+import json
 
 
 class LocalAppManager():
@@ -36,11 +37,43 @@ class LocalAppManager():
         jwtFile = open(localJWTPath, "r")
         return jwtFile.read()
 
-    def getSetting(name):
-        if name == "server_url":
+
+    def getSetting(key):
+        if key == "server_url":
             return "http://localhost:8080/"
-        if name == "local_sync_folder_path":
+        if key == "local_sync_folder_path":
             return "./test/client/"
+            
+        settings = LocalAppManager.loadSettings()
+        setting = settings[key] 
+
+        return setting
+
+    def saveSetting(key, value):
+        settings = LocalAppManager.loadSettings()
+        settings[key] = value
+
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+        jsonFile = open(path, "w")
+        settings = json.dumps(settings)
+        jsonFile.write(settings)
+        jsonFile.close()
+
+    def saveSettings(settings):
+        settings = json.dumps(settings)
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+
+        jsonFile = open(path, "w")
+        jsonFile.write(settings)
+        jsonFile.close()
+
+    def loadSettings():
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+        jsonFile = open(path, "r")
+        settings = {}
+        settings = json.load(jsonFile)
+        jsonFile.close()
+        return settings    
 
     def removeJWTLocally():
         localJWTPath = LocalAppManager.getLocalJWTPath()
