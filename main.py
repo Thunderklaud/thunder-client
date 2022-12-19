@@ -11,6 +11,7 @@ if __name__ == "__main__":
 
     # prepare local app path
     LocalAppManager.createLocalAppPathIfNotExists()
+    LocalAppManager.createDefaultSettingsJson()
 
     # get login state
     loggedIn = isLoggedIn()

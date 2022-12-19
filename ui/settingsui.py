@@ -20,22 +20,6 @@ class SettingsUI(QtWidgets.QWidget):
         self.createBottomBar()
 
 
-    def createDefaultSettingsJson(self):
-        defaultServerURL = "http://localhost:8080/"
-        defaultSyncFolderPath = "./test/client/"
-
-        settings = {}
-
-        settings["serverUrl"] = defaultServerURL
-        settings["syncFolderPath"] =  defaultSyncFolderPath
-        settings["syncFolders"] = []
-        
-        settings = json.dumps(settings)
-        path = LocalAppManager.getLocalAppPath() + "settings.json"
-
-        jsonFile = open(path, "w")
-        jsonFile.write(settings)
-        jsonFile.close()
 
 
 
@@ -164,7 +148,7 @@ class SettingsUI(QtWidgets.QWidget):
         #LocalAppManager.saveSetting("syncFolderPath", self.getLocalSyncPathInput())
         #LocalAppManager.saveSetting("syncFolders", self.getFoldersToSave())
         
-        settings = {}
+        settings = LocalAppManager.loadSettings()
 
         settings["syncFolderPath"] =  self.getLocalSyncPathInput() 
         settings["syncFolders"] = self.getFoldersToSave()
