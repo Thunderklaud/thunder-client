@@ -18,6 +18,27 @@ class SettingsUI(QtWidgets.QWidget):
         self.createMainContent()
         self.createBottomBar()
 
+
+    def createDefaultSettingsJson(self):
+        defaultServerURL = "http://localhost:8080/"
+        defaultSyncFolderPath = "./test/client/"
+
+        settings = {}
+
+        settings["serverUrl"] = defaultServerURL
+        settings["syncFolderPath"] =  defaultSyncFolderPath
+        settings["syncFolders"] = []
+        
+        settings = json.dumps(settings)
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+
+        jsonFile = open(path, "w")
+        jsonFile.write(settings)
+        jsonFile.close()
+
+
+
+
     def createLayouts(self):
         self.topBarLayout = QtWidgets.QHBoxLayout()
         self.topBarLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -78,6 +99,8 @@ class SettingsUI(QtWidgets.QWidget):
 
         for dir in folder:
             checkbox = QtWidgets.QCheckBox(dir["name"], self)
+            checkbox.setObjectName(dir["id"])
+            print(checkbox.objectName())
             checkbox.setStyleSheet(
                 "margin-left: " + str(level * perLevelPadding) + "px")
             self.syncFoldersLayout.addWidget(checkbox)
@@ -119,26 +142,40 @@ class SettingsUI(QtWidgets.QWidget):
         rowLayout.addWidget(syncFolderPathLabel)
 
         syncFolderPath = LocalAppManager.getSetting("local_sync_folder_path")
-        localSynyPathInput = QtWidgets.QLineEdit(syncFolderPath)
-        rowLayout.addWidget(localSynyPathInput)
+        self.localSyncPathInput = QtWidgets.QLineEdit(syncFolderPath)
+        rowLayout.addWidget(self.localSyncPathInput)
 
         self.settingsBoxLayout.addLayout(rowLayout)
+
+    def getLocalSyncPathInput(self):
+        return self.localSyncPathInput.text()
 
     def createSaveButton(self):
         saveButton = QtWidgets.QPushButton("Save")
         saveButton.clicked.connect(self.clickedSave)
         self.bottomBarLayout.addWidget(saveButton)
 
-    def clickedSave(self):
-        print(">>>Save<<<")
-        aList = [{"a":54, "b":87}, {"c":81, "d":63}, {"e":17, "f":39}]
-        jsonString = json.dumps(aList)
-        path = LocalAppManager.getLocalAppPath() + "settings.json"
-        print("Path::: " + path)
 
-        jsonFile = open(path, "w")
-        jsonFile.write(jsonString)
-        jsonFile.close()
+
+
+    def clickedSave(self):
+        
+        #LocalAppManager.saveSetting("syncFolderPath", self.getLocalSyncPathInput())
+        #LocalAppManager.saveSetting("syncFolders", self.getFoldersToSave())
+
+
+        
+        settings = {}
+
+        settings["syncFolderPath"] =  self.getLocalSyncPathInput() 
+        settings["syncFolders"] = self.getFoldersToSave()
+       
+        LocalAppManager.saveSettings(settings)
+
+        
+        
+
+
 
     def createLogoutButton(self):
         logoutButton = QtWidgets.QPushButton("Logout")
@@ -160,3 +197,14 @@ class SettingsUI(QtWidgets.QWidget):
         # add new notification
         notification = QtWidgets.QLabel(text)
         self.bottomBarLayout.addWidget(notification)
+
+    def getFoldersToSave(self):
+        count = self.syncFoldersLayout.count()
+        objectNames = []
+        for i in range(1, count):
+            item = self.syncFoldersLayout.itemAt(i).widget()
+            if(item.isChecked()):
+                objectNames.append(item.objectName())
+        return objectNames
+
+
