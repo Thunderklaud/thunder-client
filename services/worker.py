@@ -103,7 +103,6 @@ class Worker:
             localModifiedDate = float(os.path.getmtime(filePath))
 
             # if remote modified date is newer => download file, else upload file
-            print(str(remoteModifiedDate) + ":"+str(localModifiedDate))
             if remoteModifiedDate > localModifiedDate:
                 print("worker: download " + filePath)
                 Worker.__downloadFile(fileID, filePath)
