@@ -18,12 +18,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.createTopBar()
         self.createMainContent()
         self.createBottomBar()
-
-
-
-
-
-
+        
     def createLayouts(self):
         self.topBarLayout = QtWidgets.QHBoxLayout()
         self.topBarLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -76,7 +71,6 @@ class SettingsUI(QtWidgets.QWidget):
 
         syncDirectories = ServerSettings.getSyncDirectories()
         self.addSyncDirectoryRecursive(syncDirectories)
-
         self.refresh_button.setText("↻")
 
     def addSyncDirectoryRecursive(self, directory, level=0):

@@ -66,7 +66,6 @@ class LocalAppManager():
             return "http://localhost:8080/"
         if key == "local_sync_folder_path":
             return "./test/client/"
-        
 
     def saveSetting(key, value):
         settings = LocalAppManager.loadSettings()
