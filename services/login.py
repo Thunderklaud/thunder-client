@@ -1,6 +1,7 @@
 import requests
 from hashlib import sha256
 from services.localappmanager import LocalAppManager
+from services.thundersynchandler import ThunderSyncHandler
 from services.worker import Worker
 from utils.request import getRequestHeaders, getRequestURL
 
@@ -67,3 +68,6 @@ def doAfterLoginActions():
     if isLoggedIn():
         worker = Worker()
         worker.start()
+
+        sync_handler = ThunderSyncHandler()
+        sync_handler.run()
