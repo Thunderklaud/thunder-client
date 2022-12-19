@@ -193,10 +193,10 @@ class SettingsUI(QtWidgets.QWidget):
         self.bottomBarLayout.addWidget(notification)
 
     def getFoldersToSave(self):
-        count = self.syncFoldersLayout.count()
+        count = self.syncDirectoriesLayout.count()
         objectNames = []
         for i in range(1, count):
-            item = self.syncFoldersLayout.itemAt(i).widget()
+            item = self.syncDirectoriesLayout.itemAt(i).widget()
             if (item.isChecked()):
                 objectNames.append(item.objectName())
         return objectNames

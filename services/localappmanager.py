@@ -39,12 +39,14 @@ class LocalAppManager():
 
 
     def getSetting(key):
+
+        settings = LocalAppManager.loadSettings()
+
         if key == "server_url":
             return "http://localhost:8080/"
         if key == "local_sync_folder_path":
             return "./test/client/"
             
-        settings = LocalAppManager.loadSettings()
         setting = settings[key] 
 
         return setting
