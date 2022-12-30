@@ -23,7 +23,6 @@ class DirectorySyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def __createDirectory(src):
-        # TODO dir not creating in subdir
         print("[INFO] Create directory " + src)
 
         directoryName = getDirectoryOrFileName(src)
@@ -57,11 +56,11 @@ class DirectorySyncHandler(FileSystemEventHandler):
             # TODO: this CANNOT work!!
             directoryPath = getDirectoryPath(src)
             directoryPath = getDirectoryPath(dest)
-            print(directoryPath + ":"+directoryPath)
+            # print(directoryPath + ":"+directoryPath)
 
             directoryName = getDirectoryOrFileName(src)
             directoryName = getDirectoryOrFileName(dest)
-            print(directoryName + ":"+directoryName)
+            # print(directoryName + ":"+directoryName)
 
             # moved directory into another
             if (directoryPath != directoryPath and directoryName == directoryName):
@@ -71,8 +70,8 @@ class DirectorySyncHandler(FileSystemEventHandler):
                 request_url = getRequestURL("/data/directory")
                 headers = getRequestHeaders()
                 data = {"id": remoteDirectory["id"], "name": directoryName}
-                # requests.patch(
-                #     url=request_url, json=data, headers=headers)
+                requests.patch(
+                    url=request_url, json=data, headers=headers)
 
         print("[INFO] Move/Rename directory done")
 
@@ -101,11 +100,9 @@ class DirectorySyncHandler(FileSystemEventHandler):
     @staticmethod
     def __getRemoteDirectory(path):
         path = removeBaseURL(path, False)
-        print(path)
 
         # search for sync directory by path
         syncDirectories = ServerSettings.getSyncDirectories(False)
-        print(syncDirectories)
 
         for syncDirectory in syncDirectories:
             if "path" in syncDirectory and syncDirectory["path"] == path:

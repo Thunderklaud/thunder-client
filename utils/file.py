@@ -76,6 +76,11 @@ def getDirectoryOrFileName(path):
 
 
 def getDirectoryPath(path):
-    position = path.rfind("/") + 1  # + 1 to hold / at the end
 
-    return path[0:position]
+    # remove last slash if exists
+    if path[-1] == "/":
+        path = path[:-1]
+
+    position = path.rfind("/")
+
+    return uniqueDirectoryPath(path[0:position])

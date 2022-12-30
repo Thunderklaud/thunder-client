@@ -17,7 +17,7 @@ class StartupSyncer:
         self.syncDirectoryPath = LocalAppManager.getSetting(
             "local_sync_folder_path")
         print("[INFO] Sync local folder '" +
-              self.syncDirectoryPath + "' with remote server")
+              self.syncDirectoryPath + "' with remote server...")
 
         # create sync directory if not exists
         if not os.path.isdir(self.syncDirectoryPath):
