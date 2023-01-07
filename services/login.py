@@ -53,6 +53,7 @@ def logout(openLoginScreen):
 
     # remove local jwt and open login window
     if response.status_code == 200:
+        ThunderSyncHandler.RUNNING = False
         LocalAppManager.removeJWTLocally()
         openLoginScreen()
         return True

@@ -63,7 +63,7 @@ class LocalAppManager():
             return settings[key]
 
         if key == "server_url":
-            return "http://localhost:8080/"
+            return "https://thunderklaud-api.web2ju.de/"
         if key == "local_sync_folder_path":
             return "./test/client/"
 
