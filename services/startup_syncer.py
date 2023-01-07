@@ -1,7 +1,6 @@
 import shutil
 import os
 import io
-import datetime
 from glob import iglob
 from services.localappmanager import LocalAppManager
 import requests
@@ -123,12 +122,15 @@ class StartupSyncer:
         # build request data
         request_url += "?uuid=" + fileID
 
-        response = requests.get(url=request_url, json={}, headers=headers)
+        response = requests.get(url=request_url, json={},
+                                headers=headers, stream=True)
 
         # create and write local file
         try:
             fileHandle = io.open(filePath, "wb")
-            fileHandle.write(response.text.encode("utf-8"))
+            response.raw.decode_content = True
+            shutil.copyfileobj(response.raw, fileHandle)
+            # fileHandle.write(response.text.encode("utf-8"))
             fileHandle.close()
         except PermissionError:
             print("[ERR] Permission denied")
