@@ -35,17 +35,21 @@ class FileSyncHandler(FileSystemEventHandler):
         remoteDirectory = FileSyncHandler.__getRemoteDirectory(directoryPath)
 
         if remoteDirectory:
-            fileHandle = open(src, "rb")
-            files = {"file": fileHandle}
+            try:
+                fileHandle = open(src, "rb")
+                files = {"file": fileHandle}
 
-            request_url = getRequestURL("/data/file")
-            request_url += "?directory=" + remoteDirectory["id"]
+                request_url = getRequestURL("/data/file")
+                request_url += "?directory=" + remoteDirectory["id"]
 
-            headers = getRequestHeaders(True, "")
-            requests.put(
-                url=request_url, files=files, headers=headers)
+                headers = getRequestHeaders(True, "")
+                requests.put(
+                    url=request_url, files=files, headers=headers)
 
-            fileHandle.close()
+                fileHandle.close()
+            except FileNotFoundError:
+                print(
+                    "[ERR] Renamed file to fast. Try to delete and create the file again.")
         else:
             print("[ERR] Remote directory not found: " +
                   directoryPath + ", skip file")

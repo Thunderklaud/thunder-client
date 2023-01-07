@@ -89,4 +89,6 @@ class SyncHandlerHelper(FileSystemEventHandler):
             src_path = uniqueDirectoryPath(event.src_path)
             DirectorySyncHandler.deleteDirectory(src_path)
         else:
-            print("[ERR] undefined delete type")
+            # handles file move (watchdog is so bad :c)
+            src_path = uniqueFilePath(event.src_path)
+            FileSyncHandler.deleteFile(src_path)
