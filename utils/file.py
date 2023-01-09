@@ -13,8 +13,8 @@ def uniqueDirectoryPath(path):
     if path == "":
         return "/"
 
-    path = path.replace("\\", "/")
-    path = path.replace("//", "/")
+    # path = path.replace("\\", "/")
+    # path = path.replace("//", "/")
 
     trailingSlash = path[-1] == "/"
     beginningSlash = path[0] == "/"
@@ -26,7 +26,8 @@ def uniqueDirectoryPath(path):
     if not beginningSlash and not beginningDot:
         path = "/" + path
 
-    # TODO: remove double slashes
+    path = path.replace("//", "/")
+    path = path.replace("\\", "/")
 
     return path
 
@@ -44,14 +45,15 @@ def uniqueFilePath(path):
     if not beginningSlash and not beginningDot:
         path = "/" + path
 
-    # TODO: remove double slashes
+    path = path.replace("//", "/")
+    path = path.replace("\\", "/")
 
     return path
 
 
 def removeBaseURL(path, isFile):
     syncDirectoryPath = LocalAppManager.getSetting(
-        "local_sync_folder_path")
+        "localSyncFolderPath")
     localPathLength = len(syncDirectoryPath)
     pathLength = len(path)
     path = path[localPathLength:pathLength]
@@ -62,6 +64,11 @@ def removeBaseURL(path, isFile):
 
 
 def getDirectoryOrFileName(path):
+
+    # remove last slash if exists
+    if path[-1] == "/":
+        path = path[:-1]
+
     position = path.rfind("/") + 1  # + 1 to remove the / at the begin
     string_length = len(path)
 
@@ -69,6 +76,11 @@ def getDirectoryOrFileName(path):
 
 
 def getDirectoryPath(path):
+
+    # remove last slash if exists
+    if path[-1] == "/":
+        path = path[:-1]
+
     position = path.rfind("/")
 
-    return path[0:position]
+    return uniqueDirectoryPath(path[0:position])

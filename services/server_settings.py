@@ -1,14 +1,27 @@
 import requests
+import re
+import base64
 from utils.file import uniqueDirectoryPath, uniqueFilePath
+from services.localappmanager import LocalAppManager
 from utils.request import getRequestURL, getRequestHeaders
+from services.localappmanager import LocalAppManager
 
 
 class ServerSettings():
 
     @staticmethod
-    def getSyncDirectories(multidimensionalArray=True):
+    def getSyncDirectories(multidimensionalArray=True, includeRoot=False):
+        directoriesNotToSync = LocalAppManager.getSetting("notToSyncFolders")
+        
         directories = ServerSettings.__getDirectoryRecursive(
-            None, "", multidimensionalArray)
+            None, "", multidimensionalArray, directoriesNotToSync)
+
+        # add root directory
+        if not multidimensionalArray and includeRoot:
+            rootID = ServerSettings.getRootId()
+            directories.append(
+                {"id": rootID, "name": "", "path": "/", "childCount": 0})
+
         return directories
 
     @staticmethod
@@ -17,7 +30,7 @@ class ServerSettings():
         return files
 
     @staticmethod
-    def __getDirectoryRecursive(parentId=None, path="", multidimensionalArray=True):
+    def __getDirectoryRecursive(parentId=None, recPath="", multidimensionalArray=True, directoriesNotToSync=[]):
         result = []
 
         # do server request
@@ -35,7 +48,7 @@ class ServerSettings():
             return []
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
-        fileCount = len(jsonResponse["files"])
+        files = jsonResponse["files"]
 
         # loop the result
         for dir in dirs:
@@ -43,14 +56,19 @@ class ServerSettings():
             directoryID = dir["id"]["$oid"]
             directoryName = dir["name"]
 
-            childPath = uniqueDirectoryPath(path + "/" + directoryName)
+            childPath = uniqueDirectoryPath(
+                recPath + "/" + directoryName)
 
             directory["id"] = directoryID
             directory["name"] = directoryName
             directory["path"] = childPath
+            directory["childCount"] = len(files)
+
+            # set directory to sync/not to sync
+            directory["syncDir"] = not directoryID in directoriesNotToSync
 
             directoryChildren = ServerSettings.__getDirectoryRecursive(
-                directoryID, childPath, multidimensionalArray)
+                directoryID, childPath, multidimensionalArray, directoriesNotToSync)
 
             # set children as variable
             if multidimensionalArray:
@@ -108,3 +126,13 @@ class ServerSettings():
                 directory, childPath)
 
         return result
+
+    @staticmethod
+    def getRootId():
+        token = LocalAppManager.readLocalJWT()
+
+        header, jwt, signature = token.split(".")
+        payloadDecoded = str(base64.b64decode(jwt))
+
+        return re.findall(
+            r"\$oid\"\:\"([^\"]*)\"", payloadDecoded)[0]

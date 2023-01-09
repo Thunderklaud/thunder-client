@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 import json
 
-
 class LocalAppManager():
 
     @staticmethod
@@ -37,7 +36,40 @@ class LocalAppManager():
         jwtFile = open(localJWTPath, "r")
         return jwtFile.read()
 
+    @staticmethod
+    def createDefaultSettingsJson():
 
+
+        # if settings.json already exists
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+        if os.path.exists(path):
+            return
+
+        defaultServerURL = ""
+        defaultSyncFolderPath = "./test/client/"
+
+        settings = {}
+
+
+        settings["serverUrl"] = defaultServerURL
+        settings["syncFolderPath"] = defaultSyncFolderPath
+        settings["notToSyncFolders"] = []
+
+        settings = json.dumps(settings)
+
+        jsonFile = open(path, "w")
+        jsonFile.write(settings)
+        jsonFile.close()
+
+    # Returns one specific Setting
+    @staticmethod
+    def getSetting(key):
+
+        settings = LocalAppManager.loadSettings()
+
+        if key in settings:
+            return settings[key]
+        
     @staticmethod
     def createDefaultSettingsJson():
         defaultServerURL = "http://localhost:8080/"
@@ -56,17 +88,8 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
-    def getSetting(key):
-
-        settings = LocalAppManager.loadSettings()
-        if key in settings:
-            return settings[key]
-
-        if key == "server_url":
-            return "http://localhost:8080/"
-        if key == "local_sync_folder_path":
-            return "./test/client/"
-
+    # Saves one specific Setting
+    @staticmethod
     def saveSetting(key, value):
         settings = LocalAppManager.loadSettings()
         settings[key] = value
@@ -77,6 +100,8 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    # Saves a Map of all Settings
+    @staticmethod
     def saveSettings(settings):
         settings = json.dumps(settings)
         path = LocalAppManager.getLocalAppPath() + "settings.json"
@@ -85,14 +110,22 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    # Returns a Map with all Settings
+    @staticmethod
     def loadSettings():
         path = LocalAppManager.getLocalAppPath() + "settings.json"
         jsonFile = open(path, "r")
         settings = {}
         settings = json.load(jsonFile)
         jsonFile.close()
-        return settings    
+        return settings
 
+    @staticmethod
     def removeJWTLocally():
         localJWTPath = LocalAppManager.getLocalJWTPath()
         os.remove(localJWTPath)
+
+    @staticmethod
+    def doStartupActions():
+        LocalAppManager.createLocalAppPathIfNotExists()
+        LocalAppManager.createDefaultSettingsJson()

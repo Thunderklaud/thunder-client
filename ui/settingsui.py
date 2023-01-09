@@ -1,11 +1,12 @@
 import sys
 import json
-from PySide6 import QtCore, QtWidgets, QtGui
-from services.worker import Worker
-from services.serversettings import ServerSettings
+from PySide6 import QtCore, QtWidgets
+from services.server_settings import ServerSettings
+from ui.settings_interval_handler import SettingsIntervalHandler
 from services.localappmanager import LocalAppManager
 from services.login import logout
 from services.thundersynchandler import ThunderSyncHandler
+from services.startup_syncer import StartupSyncer
 
 
 class SettingsUI(QtWidgets.QWidget):
@@ -18,7 +19,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.createTopBar()
         self.createMainContent()
         self.createBottomBar()
-        
+
     def createLayouts(self):
         self.topBarLayout = QtWidgets.QHBoxLayout()
         self.topBarLayout.setAlignment(QtCore.Qt.AlignTop)
@@ -37,16 +38,63 @@ class SettingsUI(QtWidgets.QWidget):
         headline.setFont(font)
         self.topBarLayout.addWidget(headline)
 
-        self.createLogoutButton()
-
     def createMainContent(self):
+
+        self.createInfoArea()
+        self.createActionsArea()
         self.createSyncDirectoriesArea()
         self.createSettingsArea()
         self.createAboutArea()
 
+
+    def createInfoArea(self):
+        infoBox = QtWidgets.QGroupBox("Info")
+        self.infoBoxLayout = QtWidgets.QVBoxLayout()
+        infoBox.setLayout(self.infoBoxLayout)
+
+        # ServerURL
+        urlString = "Server URL: " + LocalAppManager.getSetting("serverURL")
+        serverURLLabel = QtWidgets.QLabel(urlString)
+        font = serverURLLabel.font()
+        font.setPointSize(8)
+        serverURLLabel.setFont(font)
+        self.infoBoxLayout.addWidget(serverURLLabel)
+
+        # 
+        statusBadge = QtWidgets.QLabel("Status: unknown")
+
+        settingsIntervalHandler = SettingsIntervalHandler()
+        settingsIntervalHandler.run(statusBadge)
+        self.infoBoxLayout.addWidget(statusBadge)
+        
+        self.contentLayout.addWidget(infoBox)
+
+
+    def createActionsArea(self):
+        actionsBox = QtWidgets.QGroupBox("Actions")
+        self.actionsBoxLayout = QtWidgets.QVBoxLayout()
+        actionsBox.setLayout(self.actionsBoxLayout)
+
+        # create LogoutButton
+        logoutButton = QtWidgets.QPushButton("Logout")
+        logoutButton.clicked.connect(self.clickedLogout)
+        self.actionsBoxLayout.addWidget(logoutButton)
+
+        #create ReSyncButton
+        reSyncButton = QtWidgets.QPushButton("ReSync")
+        reSyncButton.clicked.connect(self.clickedReSync)
+        self.actionsBoxLayout.addWidget(reSyncButton)
+        
+        self.contentLayout.addWidget(actionsBox)
+
+
     def createSyncDirectoriesArea(self):
         syncDirectoriesBox = QtWidgets.QGroupBox("Sync Directories")
         self.syncDirectoriesLayout = QtWidgets.QVBoxLayout()
+
+        infoText = QtWidgets.QLabel(
+            "All <u>checked</u> folders will be synced with the Cloud.")
+        self.syncDirectoriesLayout.addWidget(infoText)
 
         self.refresh_button = QtWidgets.QPushButton("↻")
         self.refresh_button.setToolTip(
@@ -81,6 +129,7 @@ class SettingsUI(QtWidgets.QWidget):
 
             checkbox = QtWidgets.QCheckBox(checkboxLabel, self)
             checkbox.setObjectName(dir["id"])
+            checkbox.setChecked(dir["syncDir"])
             checkbox.setStyleSheet(
                 "margin-left: " + str(level * perLevelPadding) + "px")
             self.syncDirectoriesLayout.addWidget(checkbox)
@@ -101,7 +150,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-        aboutLine2 = QtWidgets.QLabel("Version 1.0.2")
+        aboutLine2 = QtWidgets.QLabel("Version 1.1.0")
         self.aboutBoxLayout.addWidget(aboutLine2)
 
         aboutLine3 = QtWidgets.QLabel(
@@ -121,7 +170,7 @@ class SettingsUI(QtWidgets.QWidget):
         syncDirectoryPathLabel = QtWidgets.QLabel("Local Sync Directory")
         rowLayout.addWidget(syncDirectoryPathLabel)
 
-        syncFolderPath = LocalAppManager.getSetting("local_sync_folder_path")
+        syncFolderPath = LocalAppManager.getSetting("localSyncFolderPath")
         self.localSyncPathInput = QtWidgets.QLineEdit(syncFolderPath)
         rowLayout.addWidget(self.localSyncPathInput)
 
@@ -132,33 +181,37 @@ class SettingsUI(QtWidgets.QWidget):
 
     def createSaveButton(self):
         saveButton = QtWidgets.QPushButton("Save")
+        saveButton.setToolTip(
+            "Save all settings")
         saveButton.clicked.connect(self.clickedSave)
         self.bottomBarLayout.addWidget(saveButton)
 
-
-
-
     def clickedSave(self):
-        #LocalAppManager.saveSetting("syncFolderPath", self.getLocalSyncPathInput())
-        #LocalAppManager.saveSetting("syncFolders", self.getFoldersToSave())
-        
         settings = LocalAppManager.loadSettings()
 
-        settings["syncFolderPath"] =  self.getLocalSyncPathInput() 
-        settings["syncFolders"] = self.getFoldersToSave()
-       
+        settings["syncFolderPath"] = self.getLocalSyncPathInput()
+        settings["notToSyncFolders"] = self.getFoldersNotToSync()
+
         LocalAppManager.saveSettings(settings)
 
-    def createLogoutButton(self):
-        logoutButton = QtWidgets.QPushButton("Logout")
-        logoutButton.clicked.connect(self.clickedLogout)
-        self.topBarLayout.addWidget(logoutButton)
+        # show saved dialog
+        self.showSavedDialog()
+
+    def showSavedDialog(self):
+        dialog = QtWidgets.QMessageBox(self)
+        dialog.setWindowTitle("Information")
+        dialog.setText("Settings successfully saved")
+        dialog.exec()
 
     def clickedLogout(self):
         if logout(self.openLoginScreen):
             self.showNotification("Successfully logged out!")
         else:
             self.showNotification("Error: Logout not possible!")
+
+    def clickedReSync(self):
+        startupSyncer = StartupSyncer()
+        startupSyncer.start()
 
     def showNotification(self, text):
         # remove old notifcation if exists
@@ -170,14 +223,15 @@ class SettingsUI(QtWidgets.QWidget):
         notification = QtWidgets.QLabel(text)
         self.bottomBarLayout.addWidget(notification)
 
-    def getFoldersToSave(self):
+    def getFoldersNotToSync(self):
         count = self.syncDirectoriesLayout.count()
         objectNames = []
         for i in range(1, count):
             item = self.syncDirectoriesLayout.itemAt(i).widget()
-            if (item.isChecked()):
+            if not item.isChecked():
                 objectNames.append(item.objectName())
         return objectNames
 
     def closeEvent(self, event):
-        ThunderSyncHandler.RUNNING = False
+        ThunderSyncHandler.STATUS = 0
+        SettingsIntervalHandler.RUNNING = False

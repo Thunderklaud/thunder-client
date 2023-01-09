@@ -9,16 +9,16 @@ from services.login import doAfterLoginActions
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
-    # prepare local app path
-    LocalAppManager.createLocalAppPathIfNotExists()
-    LocalAppManager.createDefaultSettingsJson()
+    # create internal structure
+    LocalAppManager.doStartupActions()
 
     # get login state
     loggedIn = isLoggedIn()
 
-    # init UIManager
+    # init UI
     uimanager = UIManager()
     uimanager.createUI(loggedIn)
+    uimanager.setIcon(app)
 
     # start background worker when user is logged in on startup
     doAfterLoginActions()

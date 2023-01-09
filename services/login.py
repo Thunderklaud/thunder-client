@@ -1,12 +1,17 @@
 import requests
 from hashlib import sha256
 from services.localappmanager import LocalAppManager
+from ui.settings_interval_handler import SettingsIntervalHandler
 from services.thundersynchandler import ThunderSyncHandler
-from services.worker import Worker
+from services.startup_syncer import StartupSyncer
 from utils.request import getRequestHeaders, getRequestURL
 
 
 def isLoggedIn():
+    
+    if LocalAppManager.getSetting("serverURL") == "":
+        return False
+
     headers = getRequestHeaders()
     requestURL = getRequestURL("/user/test")
     response = requests.get(url=requestURL, headers=headers)
@@ -23,9 +28,12 @@ def register(firstname, lastname, email, password):
     requests.post(url=requestURL, json=registerData)
 
 
-def login(email, password, openSetingsScreen):
+def login(email, password, serverURL, openSetingsScreen):
     pwHash = hashPassword(password)
 
+    # save ServerURL
+    LocalAppManager.saveSetting("serverURL", serverURL);
+    
     requestURL = getRequestURL("/user/login")
     loginData = {"email": email, "pw_hash": pwHash}
     response = requests.post(url=requestURL, json=loginData)
@@ -33,6 +41,7 @@ def login(email, password, openSetingsScreen):
     # handle server error response
     if response.status_code != 200:
         return "Login failed: " + response.text
+
 
     jsonResponse = response.json()
 
@@ -45,8 +54,6 @@ def login(email, password, openSetingsScreen):
     LocalAppManager.saveJWTLocally(jwt)
     openSetingsScreen()
 
-    
-
 
 def logout(openLoginScreen):
     headers = getRequestHeaders()
@@ -55,11 +62,14 @@ def logout(openLoginScreen):
 
     # remove local jwt and open login window
     if response.status_code == 200:
+        ThunderSyncHandler.STATUS = 0
+        SettingsIntervalHandler.RUNNING = False
         LocalAppManager.removeJWTLocally()
         openLoginScreen()
         return True
 
     return False
+
 
 def hashPassword(string):
     return str(sha256(string.encode('utf-8')).hexdigest())
@@ -67,8 +77,8 @@ def hashPassword(string):
 
 def doAfterLoginActions():
     if isLoggedIn():
-        worker = Worker()
-        worker.start()
+        startupSyncer = StartupSyncer()
+        startupSyncer.start()
 
         sync_handler = ThunderSyncHandler()
         sync_handler.run()
