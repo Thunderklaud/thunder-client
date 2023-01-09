@@ -14,7 +14,7 @@ class StartupSyncer:
 
     def start(self):
         self.syncDirectoryPath = LocalAppManager.getSetting(
-            "local_sync_folder_path")
+            "localSyncFolderPath")
         print("[INFO] Sync local folder '" +
               self.syncDirectoryPath + "' with remote server...")
 

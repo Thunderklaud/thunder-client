@@ -4,7 +4,7 @@ from config import Config
 
 def getRequestURL(route):
     return LocalAppManager.getSetting(
-        "server_url") + Config.API_VERSION + route
+        "serverURL") + Config.API_VERSION + route
 
 
 def getRequestHeaders(auth=True, contentType="application/json"):

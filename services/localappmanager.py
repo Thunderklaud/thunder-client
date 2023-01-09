@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 import json
 
-
 class LocalAppManager():
 
     @staticmethod
@@ -40,15 +39,17 @@ class LocalAppManager():
     @staticmethod
     def createDefaultSettingsJson():
 
+
         # if settings.json already exists
         path = LocalAppManager.getLocalAppPath() + "settings.json"
         if os.path.exists(path):
             return
 
-        defaultServerURL = "http://localhost:8080/"
+        defaultServerURL = ""
         defaultSyncFolderPath = "./test/client/"
 
         settings = {}
+
 
         settings["serverUrl"] = defaultServerURL
         settings["syncFolderPath"] = defaultSyncFolderPath
@@ -60,18 +61,22 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    # Returns one specific Setting
     @staticmethod
     def getSetting(key):
 
         settings = LocalAppManager.loadSettings()
+
         if key in settings:
             return settings[key]
 
-        if key == "server_url":
-            return "https://thunderklaud-api.web2ju.de/"
-        if key == "local_sync_folder_path":
-            return "./test/client/"
+        # if key == "server_url":
+        #    return "https://thunderklaud-api.web2ju.de/"
 
+        # if key == "local_sync_folder_path":
+        #     return "./test/client/"
+
+    # Saves one specific Setting
     @staticmethod
     def saveSetting(key, value):
         settings = LocalAppManager.loadSettings()
@@ -83,6 +88,7 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    # Saves a Map of all Settings
     @staticmethod
     def saveSettings(settings):
         settings = json.dumps(settings)
@@ -92,6 +98,7 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    # Returns a Map with all Settings
     @staticmethod
     def loadSettings():
         path = LocalAppManager.getLocalAppPath() + "settings.json"

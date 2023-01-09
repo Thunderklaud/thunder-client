@@ -8,6 +8,10 @@ from utils.request import getRequestHeaders, getRequestURL
 
 
 def isLoggedIn():
+    
+    if LocalAppManager.getSetting("serverURL") == "":
+        return False
+
     headers = getRequestHeaders()
     requestURL = getRequestURL("/user/test")
     response = requests.get(url=requestURL, headers=headers)
@@ -24,9 +28,12 @@ def register(firstname, lastname, email, password):
     requests.post(url=requestURL, json=registerData)
 
 
-def login(email, password, openSetingsScreen):
+def login(email, password, serverURL, openSetingsScreen):
     pwHash = hashPassword(password)
 
+    # save ServerURL
+    LocalAppManager.saveSetting("serverURL", serverURL);
+    
     requestURL = getRequestURL("/user/login")
     loginData = {"email": email, "pw_hash": pwHash}
     response = requests.post(url=requestURL, json=loginData)
@@ -34,6 +41,7 @@ def login(email, password, openSetingsScreen):
     # handle server error response
     if response.status_code != 200:
         return "Login failed: " + response.text
+
 
     jsonResponse = response.json()
 
