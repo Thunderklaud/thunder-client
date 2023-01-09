@@ -2,6 +2,7 @@ import sys
 import json
 from PySide6 import QtCore, QtWidgets
 from services.server_settings import ServerSettings
+from ui.settings_interval_handler import SettingsIntervalHandler
 from services.localappmanager import LocalAppManager
 from services.login import logout
 from services.thundersynchandler import ThunderSyncHandler
@@ -39,9 +40,17 @@ class SettingsUI(QtWidgets.QWidget):
         self.createLogoutButton()
 
     def createMainContent(self):
+        self.createStatusBadge()
         self.createSyncDirectoriesArea()
         self.createSettingsArea()
         self.createAboutArea()
+
+    def createStatusBadge(self):
+        statusBadge = QtWidgets.QLabel("Status: unknown")
+
+        settingsIntervalHandler = SettingsIntervalHandler()
+        settingsIntervalHandler.run(statusBadge)
+        self.contentLayout.addWidget(statusBadge)
 
     def createSyncDirectoriesArea(self):
         syncDirectoriesBox = QtWidgets.QGroupBox("Sync Directories")
@@ -58,7 +67,6 @@ class SettingsUI(QtWidgets.QWidget):
         self.syncDirectoriesLayout.addWidget(self.refresh_button)
 
         syncDirectories = ServerSettings.getSyncDirectories()
-        print(syncDirectories)
         self.addSyncDirectoryRecursive(syncDirectories)
 
         syncDirectoriesBox.setLayout(self.syncDirectoriesLayout)
@@ -190,4 +198,5 @@ class SettingsUI(QtWidgets.QWidget):
         return objectNames
 
     def closeEvent(self, event):
-        ThunderSyncHandler.RUNNING = False
+        ThunderSyncHandler.STATUS = 0
+        SettingsIntervalHandler.RUNNING = False

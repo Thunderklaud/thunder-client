@@ -11,8 +11,8 @@ from utils.file import removeBaseURL, uniqueFilePath, uniqueDirectoryPath
 
 class ThunderSyncHandler:
 
-    # global variable to set wheter the observer is running
-    RUNNING = False
+    # global variable to set the observers state (0 = offline, 1 = running, 2 = syncing)
+    STATUS = 0
 
     def __init__(self):
         self.observer = Observer()
@@ -27,6 +27,7 @@ class ThunderSyncHandler:
     def start(self):
         print("[INFO] Starting watchdog synchronisation for " +
               self.observer_directory + "...")
+        ThunderSyncHandler.STATUS = 1
         event_handler = SyncHandlerHelper()
 
         self.observer.schedule(
@@ -34,7 +35,7 @@ class ThunderSyncHandler:
 
         self.observer.start()
         try:
-            while ThunderSyncHandler.RUNNING:
+            while ThunderSyncHandler.STATUS != 0:
                 time.sleep(3)
         except:
             self.observer.stop()
@@ -59,6 +60,7 @@ class SyncHandlerHelper(FileSystemEventHandler):
 
     @staticmethod
     def __deleteFileOrDirectory(event):
+        ThunderSyncHandler.STATUS = 2
 
         filePath = removeBaseURL(event.src_path, True)
         directoryPath = removeBaseURL(event.src_path, False)
@@ -92,3 +94,5 @@ class SyncHandlerHelper(FileSystemEventHandler):
             # handles file move (watchdog is so bad :c)
             src_path = uniqueFilePath(event.src_path)
             FileSyncHandler.deleteFile(src_path)
+
+    ThunderSyncHandler.STATUS = 1

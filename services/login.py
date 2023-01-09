@@ -1,6 +1,7 @@
 import requests
 from hashlib import sha256
 from services.localappmanager import LocalAppManager
+from ui.settings_interval_handler import SettingsIntervalHandler
 from services.thundersynchandler import ThunderSyncHandler
 from services.startup_syncer import StartupSyncer
 from utils.request import getRequestHeaders, getRequestURL
@@ -53,7 +54,8 @@ def logout(openLoginScreen):
 
     # remove local jwt and open login window
     if response.status_code == 200:
-        ThunderSyncHandler.RUNNING = False
+        ThunderSyncHandler.STATUS = 0
+        SettingsIntervalHandler.RUNNING = False
         LocalAppManager.removeJWTLocally()
         openLoginScreen()
         return True
