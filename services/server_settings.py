@@ -2,6 +2,7 @@ import requests
 import re
 import base64
 from utils.file import uniqueDirectoryPath, uniqueFilePath
+from services.localappmanager import LocalAppManager
 from utils.request import getRequestURL, getRequestHeaders
 from services.localappmanager import LocalAppManager
 
@@ -10,8 +11,10 @@ class ServerSettings():
 
     @staticmethod
     def getSyncDirectories(multidimensionalArray=True, includeRoot=False):
+        directoriesNotToSync = LocalAppManager.getSetting("notToSyncFolders")
+        
         directories = ServerSettings.__getDirectoryRecursive(
-            None, "", multidimensionalArray)
+            None, "", multidimensionalArray, directoriesNotToSync)
 
         # add root directory
         if not multidimensionalArray and includeRoot:
@@ -27,7 +30,7 @@ class ServerSettings():
         return files
 
     @staticmethod
-    def __getDirectoryRecursive(parentId=None, recPath="", multidimensionalArray=True):
+    def __getDirectoryRecursive(parentId=None, recPath="", multidimensionalArray=True, directoriesNotToSync=[]):
         result = []
 
         # do server request
@@ -61,8 +64,11 @@ class ServerSettings():
             directory["path"] = childPath
             directory["childCount"] = len(files)
 
+            # set directory to sync/not to sync
+            directory["syncDir"] = not directoryID in directoriesNotToSync
+
             directoryChildren = ServerSettings.__getDirectoryRecursive(
-                directoryID, childPath, multidimensionalArray)
+                directoryID, childPath, multidimensionalArray, directoriesNotToSync)
 
             # set children as variable
             if multidimensionalArray:

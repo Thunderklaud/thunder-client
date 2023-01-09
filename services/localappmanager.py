@@ -39,6 +39,12 @@ class LocalAppManager():
 
     @staticmethod
     def createDefaultSettingsJson():
+
+        # if settings.json already exists
+        path = LocalAppManager.getLocalAppPath() + "settings.json"
+        if os.path.exists(path):
+            return
+
         defaultServerURL = "http://localhost:8080/"
         defaultSyncFolderPath = "./test/client/"
 
@@ -46,10 +52,9 @@ class LocalAppManager():
 
         settings["serverUrl"] = defaultServerURL
         settings["syncFolderPath"] = defaultSyncFolderPath
-        settings["syncFolders"] = []
+        settings["notToSyncFolders"] = []
 
         settings = json.dumps(settings)
-        path = LocalAppManager.getLocalAppPath() + "settings.json"
 
         jsonFile = open(path, "w")
         jsonFile.write(settings)

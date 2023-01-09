@@ -47,6 +47,10 @@ class SettingsUI(QtWidgets.QWidget):
         syncDirectoriesBox = QtWidgets.QGroupBox("Sync Directories")
         self.syncDirectoriesLayout = QtWidgets.QVBoxLayout()
 
+        infoText = QtWidgets.QLabel(
+            "All <u>checked</u> folders will be synced with the Cloud.")
+        self.syncDirectoriesLayout.addWidget(infoText)
+
         self.refresh_button = QtWidgets.QPushButton("↻")
         self.refresh_button.setToolTip(
             "Fetch the newest directories from the server")
@@ -81,6 +85,7 @@ class SettingsUI(QtWidgets.QWidget):
 
             checkbox = QtWidgets.QCheckBox(checkboxLabel, self)
             checkbox.setObjectName(dir["id"])
+            checkbox.setChecked(dir["syncDir"])
             checkbox.setStyleSheet(
                 "margin-left: " + str(level * perLevelPadding) + "px")
             self.syncDirectoriesLayout.addWidget(checkbox)
@@ -101,7 +106,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-        aboutLine2 = QtWidgets.QLabel("Version 1.0.2")
+        aboutLine2 = QtWidgets.QLabel("Version 1.1.0")
         self.aboutBoxLayout.addWidget(aboutLine2)
 
         aboutLine3 = QtWidgets.QLabel(
@@ -132,6 +137,8 @@ class SettingsUI(QtWidgets.QWidget):
 
     def createSaveButton(self):
         saveButton = QtWidgets.QPushButton("Save")
+        saveButton.setToolTip(
+            "Save all settings")
         saveButton.clicked.connect(self.clickedSave)
         self.bottomBarLayout.addWidget(saveButton)
 
@@ -139,9 +146,18 @@ class SettingsUI(QtWidgets.QWidget):
         settings = LocalAppManager.loadSettings()
 
         settings["syncFolderPath"] = self.getLocalSyncPathInput()
-        settings["syncFolders"] = self.getFoldersToSave()
+        settings["notToSyncFolders"] = self.getFoldersNotToSync()
 
         LocalAppManager.saveSettings(settings)
+
+        # show saved dialog
+        self.showSavedDialog()
+
+    def showSavedDialog(self):
+        dialog = QtWidgets.QMessageBox(self)
+        dialog.setWindowTitle("Information")
+        dialog.setText("Settings successfully saved")
+        dialog.exec()
 
     def createLogoutButton(self):
         logoutButton = QtWidgets.QPushButton("Logout")
@@ -164,12 +180,12 @@ class SettingsUI(QtWidgets.QWidget):
         notification = QtWidgets.QLabel(text)
         self.bottomBarLayout.addWidget(notification)
 
-    def getFoldersToSave(self):
+    def getFoldersNotToSync(self):
         count = self.syncDirectoriesLayout.count()
         objectNames = []
         for i in range(1, count):
             item = self.syncDirectoriesLayout.itemAt(i).widget()
-            if (item.isChecked()):
+            if not item.isChecked():
                 objectNames.append(item.objectName())
         return objectNames
 
