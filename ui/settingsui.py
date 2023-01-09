@@ -38,8 +38,6 @@ class SettingsUI(QtWidgets.QWidget):
         headline.setFont(font)
         self.topBarLayout.addWidget(headline)
 
-        
-
     def createMainContent(self):
 
         self.createInfoArea()
@@ -195,7 +193,6 @@ class SettingsUI(QtWidgets.QWidget):
         settings["notToSyncFolders"] = self.getFoldersNotToSync()
 
         LocalAppManager.saveSettings(settings)
-
 
         # show saved dialog
         self.showSavedDialog()
