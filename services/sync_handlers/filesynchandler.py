@@ -28,6 +28,7 @@ class FileSyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def createFile(src):
+        # ThunderSyncHandler.STATUS = 2
         print("[INFO] Create file: " + src)
 
         # get current directory
@@ -54,10 +55,12 @@ class FileSyncHandler(FileSystemEventHandler):
             print("[ERR] Remote directory not found: " +
                   directoryPath + ", skip file")
 
-        print("[INFO] Create file done.")
+        print("[INFO] Create file done")
+        # ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def __renameFile(src, dest):
+        # ThunderSyncHandler.STATUS = 2
         print("[INFO] Rename file " + src + " to " + dest)
 
         remoteFile = FileSyncHandler.__getRemoteFile(src)
@@ -74,9 +77,11 @@ class FileSyncHandler(FileSystemEventHandler):
                 url=request_url, json=data, headers=headers)
 
         print("[INFO] Renamed file done.")
+        # ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def deleteFile(src_path):
+        # ThunderSyncHandler.STATUS = 2
         src_path = src_path.replace("\\", "/")
         print("[INFO] Delete file: " + src_path)
 
@@ -96,10 +101,12 @@ class FileSyncHandler(FileSystemEventHandler):
             print("[ERR] File deletion of " + src_path +
                   " not possible, not found on the server")
 
-        print("[INFO] Delete file done.")
+        print("[INFO] Delete file done")
+        # ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def __modifyFile(src_path):
+        # ThunderSyncHandler.STATUS = 2
         src_path = src_path.replace("\\", "/")
         print("[INFO] Modify file (delete and create): " + src_path)
 
@@ -109,7 +116,8 @@ class FileSyncHandler(FileSystemEventHandler):
         # create new file
         FileSyncHandler.createFile(src_path)
 
-        print("[INFO] Modify file (delete and create) done.")
+        print("[INFO] Modify file (delete and create) done")
+        # ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def __getRemoteFile(path):
@@ -129,7 +137,8 @@ class FileSyncHandler(FileSystemEventHandler):
         dir_path = removeBaseURL(dir_path, False)
 
         # search for sync directory by path
-        syncDirectories = ServerSettings.getSyncDirectories(False)
+        syncDirectories = ServerSettings.getSyncDirectories(False, True)
+        print(syncDirectories)
 
         for syncDirectory in syncDirectories:
             if "path" in syncDirectory and syncDirectory["path"] == dir_path:
