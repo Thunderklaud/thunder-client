@@ -5,6 +5,7 @@ from services.server_settings import ServerSettings
 from services.localappmanager import LocalAppManager
 from services.login import logout
 from services.thundersynchandler import ThunderSyncHandler
+from services.startup_syncer import StartupSyncer
 
 
 class SettingsUI(QtWidgets.QWidget):
@@ -36,12 +37,49 @@ class SettingsUI(QtWidgets.QWidget):
         headline.setFont(font)
         self.topBarLayout.addWidget(headline)
 
-        self.createLogoutButton()
+        
 
     def createMainContent(self):
+        self.createInfoArea()
+        self.createActionsArea()
         self.createSyncDirectoriesArea()
         self.createSettingsArea()
         self.createAboutArea()
+
+
+    def createInfoArea(self):
+        infoBox = QtWidgets.QGroupBox("Info")
+        self.infoBoxLayout = QtWidgets.QVBoxLayout()
+        infoBox.setLayout(self.infoBoxLayout)
+
+        # ServerURL
+        urlString = "Server Url: " + LocalAppManager.getSetting("serverURL")
+        serverURLLabel = QtWidgets.QLabel(urlString)
+        font = serverURLLabel.font()
+        font.setPointSize(8)
+        serverURLLabel.setFont(font)
+        self.infoBoxLayout.addWidget(serverURLLabel)
+        
+        self.contentLayout.addWidget(infoBox)
+
+
+    def createActionsArea(self):
+        actionsBox = QtWidgets.QGroupBox("Actions")
+        self.actionsBoxLayout = QtWidgets.QVBoxLayout()
+        actionsBox.setLayout(self.actionsBoxLayout)
+
+        # create LogoutButton
+        logoutButton = QtWidgets.QPushButton("Logout")
+        logoutButton.clicked.connect(self.clickedLogout)
+        self.actionsBoxLayout.addWidget(logoutButton)
+
+        #create ReSyncButton
+        reSyncButton = QtWidgets.QPushButton("ReSync")
+        reSyncButton.clicked.connect(self.clickedReSync)
+        self.actionsBoxLayout.addWidget(reSyncButton)
+        
+        self.contentLayout.addWidget(actionsBox)
+
 
     def createSyncDirectoriesArea(self):
         syncDirectoriesBox = QtWidgets.QGroupBox("Sync Directories")
@@ -142,16 +180,15 @@ class SettingsUI(QtWidgets.QWidget):
 
         LocalAppManager.saveSettings(settings)
 
-    def createLogoutButton(self):
-        logoutButton = QtWidgets.QPushButton("Logout")
-        logoutButton.clicked.connect(self.clickedLogout)
-        self.topBarLayout.addWidget(logoutButton)
-
     def clickedLogout(self):
         if logout(self.openLoginScreen):
             self.showNotification("Successfully logged out!")
         else:
             self.showNotification("Error: Logout not possible!")
+
+    def clickedReSync(self):
+        startupSyncer = StartupSyncer()
+        startupSyncer.start()
 
     def showNotification(self, text):
         # remove old notifcation if exists

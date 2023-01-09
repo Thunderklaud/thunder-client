@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 import json
 
-
 class LocalAppManager():
 
     @staticmethod
@@ -55,6 +54,7 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    # Returns one specific Setting
     @staticmethod
     def getSetting(key):
 
@@ -69,6 +69,7 @@ class LocalAppManager():
         # if key == "local_sync_folder_path":
         #     return "./test/client/"
 
+    # Saves one specific Setting
     @staticmethod
     def saveSetting(key, value):
         settings = LocalAppManager.loadSettings()
@@ -80,6 +81,7 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    # Saves a Map of all Settings
     @staticmethod
     def saveSettings(settings):
         settings = json.dumps(settings)
@@ -89,6 +91,7 @@ class LocalAppManager():
         jsonFile.write(settings)
         jsonFile.close()
 
+    # Returns a Map with all Settings
     @staticmethod
     def loadSettings():
         path = LocalAppManager.getLocalAppPath() + "settings.json"
