@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import json
 
+
 class LocalAppManager():
 
     @staticmethod
@@ -39,7 +40,6 @@ class LocalAppManager():
     @staticmethod
     def createDefaultSettingsJson():
 
-
         # if settings.json already exists
         path = LocalAppManager.getLocalAppPath() + "settings.json"
         if os.path.exists(path):
@@ -49,7 +49,6 @@ class LocalAppManager():
         defaultSyncFolderPath = "./test/client/"
 
         settings = {}
-
 
         settings["serverUrl"] = defaultServerURL
         settings["syncFolderPath"] = defaultSyncFolderPath
@@ -69,7 +68,9 @@ class LocalAppManager():
 
         if key in settings:
             return settings[key]
-        
+
+        return ""
+
     @staticmethod
     def createDefaultSettingsJson():
         defaultServerURL = "http://localhost:8080/"
@@ -78,9 +79,9 @@ class LocalAppManager():
         settings = {}
 
         settings["serverUrl"] = defaultServerURL
-        settings["syncFolderPath"] =  defaultSyncFolderPath
+        settings["syncFolderPath"] = defaultSyncFolderPath
         settings["syncFolders"] = []
-        
+
         settings = json.dumps(settings)
         path = LocalAppManager.getLocalAppPath() + "settings.json"
 
