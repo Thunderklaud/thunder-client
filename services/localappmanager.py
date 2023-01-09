@@ -69,25 +69,11 @@ class LocalAppManager():
         if key in settings:
             return settings[key]
 
-        return ""
+        # if key == "server_url":
+        #    return "https://thunderklaud-api.web2ju.de/"
 
-    @staticmethod
-    def createDefaultSettingsJson():
-        defaultServerURL = "http://localhost:8080/"
-        defaultSyncFolderPath = "./test/client/"
-
-        settings = {}
-
-        settings["serverUrl"] = defaultServerURL
-        settings["syncFolderPath"] = defaultSyncFolderPath
-        settings["syncFolders"] = []
-
-        settings = json.dumps(settings)
-        path = LocalAppManager.getLocalAppPath() + "settings.json"
-
-        jsonFile = open(path, "w")
-        jsonFile.write(settings)
-        jsonFile.close()
+        # if key == "local_sync_folder_path":
+        #     return "./test/client/"
 
     # Saves one specific Setting
     @staticmethod
