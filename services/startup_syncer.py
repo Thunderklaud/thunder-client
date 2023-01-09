@@ -23,17 +23,21 @@ class StartupSyncer:
         if not os.path.isdir(self.syncDirectoryPath):
             os.makedirs(self.syncDirectoryPath)
 
+        # get all dirs that should not be synced
+        directoriesNotToSync = LocalAppManager.getSetting("notToSyncFolders")
+
         # create local directories
         self.remoteFilesAndDirectories = StartupSyncer.__downloadRemoteContentRecursive(
-            self)
+            self, None, "", directoriesNotToSync)
 
         # delete local directories that does not exists on the server
-        StartupSyncer.__deleteFilesAndDirectoriessNotOnServer(self)
+        StartupSyncer.__deleteFilesAndDirectoriessNotOnServer(
+            self, directoriesNotToSync)
 
         print("[INFO] Sync local folder done")
 
     @staticmethod
-    def __downloadRemoteContentRecursive(self, parent_id=None, path=""):
+    def __downloadRemoteContentRecursive(self, parent_id=None, path="", directoriesNotToSync=[]):
         result = []
 
         # do server request
@@ -67,15 +71,21 @@ class StartupSyncer:
             # create local directory
             directoryPath = self.syncDirectoryPath + "/" + path + "/" + directoryName
             directoryPath = uniqueDirectoryPath(directoryPath)
-            if not os.path.isdir(directoryPath):
-                os.makedirs(directoryPath)
+
+            # only create folder if folder should be synced
+            if not directoryID in directoriesNotToSync:
+                if not os.path.isdir(directoryPath):
+                    os.makedirs(directoryPath)
 
             childPath = uniqueDirectoryPath(path + "/" + directoryName)
             directory["id"] = directoryID
             directory["name"] = directoryName
             directory["path"] = childPath
-            result += StartupSyncer.__downloadRemoteContentRecursive(self,
-                                                                     directoryID, childPath)
+
+            # only get children if folder should be synced
+            if not directoryID in directoriesNotToSync:
+                result += StartupSyncer.__downloadRemoteContentRecursive(self,
+                                                                         directoryID, childPath, directoriesNotToSync)
 
             result.append(directory)
 
@@ -134,7 +144,8 @@ class StartupSyncer:
             print("[ERR] Permission denied")
 
     @staticmethod
-    def __deleteFilesAndDirectoriessNotOnServer(self):
+    # TODO: directoriesNotToSync
+    def __deleteFilesAndDirectoriessNotOnServer(self, directoriesNotToSync):
         for path in iglob(self.syncDirectoryPath + '/**/**', recursive=True):
             absolutePath = path
 

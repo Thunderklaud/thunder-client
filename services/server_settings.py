@@ -1,5 +1,6 @@
 import requests
 from utils.file import uniqueDirectoryPath, uniqueFilePath
+from services.localappmanager import LocalAppManager
 from utils.request import getRequestURL, getRequestHeaders
 
 
@@ -7,8 +8,10 @@ class ServerSettings():
 
     @staticmethod
     def getSyncDirectories(multidimensionalArray=True):
+        directoriesNotToSync = LocalAppManager.getSetting("notToSyncFolders")
+
         directories = ServerSettings.__getDirectoryRecursive(
-            None, "", multidimensionalArray)
+            None, "", multidimensionalArray, directoriesNotToSync)
         return directories
 
     @staticmethod
@@ -17,7 +20,7 @@ class ServerSettings():
         return files
 
     @staticmethod
-    def __getDirectoryRecursive(parentId=None, recPath="", multidimensionalArray=True):
+    def __getDirectoryRecursive(parentId=None, recPath="", multidimensionalArray=True, directoriesNotToSync=[]):
         result = []
 
         # do server request
@@ -49,8 +52,11 @@ class ServerSettings():
             directory["name"] = directoryName
             directory["path"] = childPath
 
+            # set directory to sync/not to sync
+            directory["syncDir"] = not directoryID in directoriesNotToSync
+
             directoryChildren = ServerSettings.__getDirectoryRecursive(
-                directoryID, childPath, multidimensionalArray)
+                directoryID, childPath, multidimensionalArray, directoriesNotToSync)
 
             # set children as variable
             if multidimensionalArray:
