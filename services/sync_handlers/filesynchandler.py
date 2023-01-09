@@ -125,7 +125,8 @@ class FileSyncHandler(FileSystemEventHandler):
         dir_path = removeBaseURL(dir_path, False)
 
         # search for sync directory by path
-        syncDirectories = ServerSettings.getSyncDirectories(False)
+        syncDirectories = ServerSettings.getSyncDirectories(False, True)
+        print(syncDirectories)
 
         for syncDirectory in syncDirectories:
             if "path" in syncDirectory and syncDirectory["path"] == dir_path:

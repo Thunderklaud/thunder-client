@@ -54,6 +54,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.syncDirectoriesLayout.addWidget(self.refresh_button)
 
         syncDirectories = ServerSettings.getSyncDirectories()
+        print(syncDirectories)
         self.addSyncDirectoryRecursive(syncDirectories)
 
         syncDirectoriesBox.setLayout(self.syncDirectoriesLayout)

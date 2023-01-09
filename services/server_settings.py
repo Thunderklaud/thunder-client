@@ -1,14 +1,24 @@
 import requests
+import re
+import base64
 from utils.file import uniqueDirectoryPath, uniqueFilePath
 from utils.request import getRequestURL, getRequestHeaders
+from services.localappmanager import LocalAppManager
 
 
 class ServerSettings():
 
     @staticmethod
-    def getSyncDirectories(multidimensionalArray=True):
+    def getSyncDirectories(multidimensionalArray=True, includeRoot=False):
         directories = ServerSettings.__getDirectoryRecursive(
             None, "", multidimensionalArray)
+
+        # add root directory
+        if not multidimensionalArray and includeRoot:
+            rootID = ServerSettings.getRootId()
+            directories.append(
+                {"id": rootID, "name": "", "path": "/", "childCount": 0})
+
         return directories
 
     @staticmethod
@@ -35,6 +45,7 @@ class ServerSettings():
             return []
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
+        files = jsonResponse["files"]
 
         # loop the result
         for dir in dirs:
@@ -48,6 +59,7 @@ class ServerSettings():
             directory["id"] = directoryID
             directory["name"] = directoryName
             directory["path"] = childPath
+            directory["childCount"] = len(files)
 
             directoryChildren = ServerSettings.__getDirectoryRecursive(
                 directoryID, childPath, multidimensionalArray)
@@ -108,3 +120,13 @@ class ServerSettings():
                 directory, childPath)
 
         return result
+
+    @staticmethod
+    def getRootId():
+        token = LocalAppManager.readLocalJWT()
+
+        header, jwt, signature = token.split(".")
+        payloadDecoded = str(base64.b64decode(jwt))
+
+        return re.findall(
+            r"\$oid\"\:\"([^\"]*)\"", payloadDecoded)[0]
