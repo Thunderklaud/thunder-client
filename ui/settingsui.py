@@ -44,7 +44,6 @@ class SettingsUI(QtWidgets.QWidget):
 
         self.createInfoArea()
         self.createActionsArea()
-        self.createStatusBadge()
         self.createSyncDirectoriesArea()
         self.createSettingsArea()
         self.createAboutArea()
@@ -56,12 +55,19 @@ class SettingsUI(QtWidgets.QWidget):
         infoBox.setLayout(self.infoBoxLayout)
 
         # ServerURL
-        urlString = "Server Url: " + LocalAppManager.getSetting("serverURL")
+        urlString = "Server URL: " + LocalAppManager.getSetting("serverURL")
         serverURLLabel = QtWidgets.QLabel(urlString)
         font = serverURLLabel.font()
         font.setPointSize(8)
         serverURLLabel.setFont(font)
         self.infoBoxLayout.addWidget(serverURLLabel)
+
+        # 
+        statusBadge = QtWidgets.QLabel("Status: unknown")
+
+        settingsIntervalHandler = SettingsIntervalHandler()
+        settingsIntervalHandler.run(statusBadge)
+        self.infoBoxLayout.addWidget(statusBadge)
         
         self.contentLayout.addWidget(infoBox)
 
@@ -83,12 +89,6 @@ class SettingsUI(QtWidgets.QWidget):
         
         self.contentLayout.addWidget(actionsBox)
 
-    def createStatusBadge(self):
-        statusBadge = QtWidgets.QLabel("Status: unknown")
-
-        settingsIntervalHandler = SettingsIntervalHandler()
-        settingsIntervalHandler.run(statusBadge)
-        self.contentLayout.addWidget(statusBadge)
 
     def createSyncDirectoriesArea(self):
         syncDirectoriesBox = QtWidgets.QGroupBox("Sync Directories")

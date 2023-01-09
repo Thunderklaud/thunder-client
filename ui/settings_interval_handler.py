@@ -23,7 +23,6 @@ class SettingsIntervalHandler:
                     status = "waiting for changes"
                 if ThunderSyncHandler.STATUS == 2:
                     status = "syncing"
-                print("Status: " + status)
                 self.statusBadge.setText("Status: " + status)
                 time.sleep(1)
         except:
