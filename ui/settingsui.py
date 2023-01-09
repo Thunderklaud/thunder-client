@@ -46,7 +46,6 @@ class SettingsUI(QtWidgets.QWidget):
         self.createSettingsArea()
         self.createAboutArea()
 
-
     def createInfoArea(self):
         infoBox = QtWidgets.QGroupBox("Info")
         self.infoBoxLayout = QtWidgets.QVBoxLayout()
@@ -60,15 +59,14 @@ class SettingsUI(QtWidgets.QWidget):
         serverURLLabel.setFont(font)
         self.infoBoxLayout.addWidget(serverURLLabel)
 
-        # 
+        #
         statusBadge = QtWidgets.QLabel("Status: unknown")
 
         settingsIntervalHandler = SettingsIntervalHandler()
         settingsIntervalHandler.run(statusBadge)
         self.infoBoxLayout.addWidget(statusBadge)
-        
-        self.contentLayout.addWidget(infoBox)
 
+        self.contentLayout.addWidget(infoBox)
 
     def createActionsArea(self):
         actionsBox = QtWidgets.QGroupBox("Actions")
@@ -80,13 +78,12 @@ class SettingsUI(QtWidgets.QWidget):
         logoutButton.clicked.connect(self.clickedLogout)
         self.actionsBoxLayout.addWidget(logoutButton)
 
-        #create ReSyncButton
+        # create ReSyncButton
         reSyncButton = QtWidgets.QPushButton("ReSync")
         reSyncButton.clicked.connect(self.clickedReSync)
         self.actionsBoxLayout.addWidget(reSyncButton)
-        
-        self.contentLayout.addWidget(actionsBox)
 
+        self.contentLayout.addWidget(actionsBox)
 
     def createSyncDirectoriesArea(self):
         syncDirectoriesBox = QtWidgets.QGroupBox("Sync Directories")
@@ -150,7 +147,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-        aboutLine2 = QtWidgets.QLabel("Version 1.1.0")
+        aboutLine2 = QtWidgets.QLabel("Version 1.1.3")
         self.aboutBoxLayout.addWidget(aboutLine2)
 
         aboutLine3 = QtWidgets.QLabel(
