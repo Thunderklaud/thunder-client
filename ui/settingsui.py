@@ -120,7 +120,7 @@ class SettingsUI(QtWidgets.QWidget):
         syncDirectoryPathLabel = QtWidgets.QLabel("Local Sync Directory")
         rowLayout.addWidget(syncDirectoryPathLabel)
 
-        syncFolderPath = LocalAppManager.getSetting("local_sync_folder_path")
+        syncFolderPath = LocalAppManager.getSetting("localSyncFolderPath")
         self.localSyncPathInput = QtWidgets.QLineEdit(syncFolderPath)
         rowLayout.addWidget(self.localSyncPathInput)
 

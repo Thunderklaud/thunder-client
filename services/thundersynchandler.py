@@ -17,7 +17,7 @@ class ThunderSyncHandler:
     def __init__(self):
         self.observer = Observer()
         self.observer_directory = LocalAppManager.getSetting(
-            "local_sync_folder_path")
+            "localSyncFolderPath")
 
     # Start observer in new thread
     def run(self):

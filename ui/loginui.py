@@ -19,7 +19,7 @@ class LoginUI(QtWidgets.QWidget):
 
         self.loginFeedback = QtWidgets.QLabel("")
 
-        self.serverURLInput = QtWidgets.QLineEdit("Hallo")
+        self.serverURLInput = QtWidgets.QLineEdit("https://thunderklaud-api.web2ju.de/")
         self.serverURLInput.setPlaceholderText("Server URL")
 
         self.usernameInput = QtWidgets.QLineEdit("@")  # TestData
@@ -54,5 +54,6 @@ class LoginUI(QtWidgets.QWidget):
     def clickedLogin(self):
         mail = self.usernameInput.text()
         pw = self.passwordInput.text()
-        loginFeedbackText = login(mail, pw, self.openSettingsScreen)
+        serverURL = self.serverURLInput.text()
+        loginFeedbackText = login(mail, pw, serverURL, self.openSettingsScreen)
         self.loginFeedback.setText(loginFeedbackText)
