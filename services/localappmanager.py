@@ -74,6 +74,7 @@ class LocalAppManager():
 
         # if key == "local_sync_folder_path":
         #     return "./test/client/"
+        return ""
 
     # Saves one specific Setting
     @staticmethod
