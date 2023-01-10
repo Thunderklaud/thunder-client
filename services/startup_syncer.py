@@ -136,6 +136,7 @@ class StartupSyncer:
                                 headers=headers, stream=True)
 
         # create and write local file
+        filePath = uniqueFilePath(filePath)
         try:
             fileHandle = io.open(filePath, "wb")
             response.raw.decode_content = True

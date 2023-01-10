@@ -26,6 +26,10 @@ def uniqueDirectoryPath(path):
     if not beginningSlash and not beginningDot:
         path = "/" + path
 
+    # remove slash when drive
+    if path[0] == "/" and len(path) > 2 and path[2] == ":":
+        path = path[1:]
+
     path = path.replace("//", "/")
     path = path.replace("\\", "/")
 
@@ -44,6 +48,10 @@ def uniqueFilePath(path):
 
     if not beginningSlash and not beginningDot:
         path = "/" + path
+
+    # remove slash when drive
+    if beginningSlash and path[2] == ":":
+        path = path[1:]
 
     path = path.replace("//", "/")
     path = path.replace("\\", "/")
