@@ -28,7 +28,9 @@ class FileSyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def createFile(src):
-        # ThunderSyncHandler.STATUS = 2
+        from services.thundersynchandler import ThunderSyncHandler
+
+        ThunderSyncHandler.STATUS = 2
         print("[INFO] Create file: " + src)
 
         # get current directory
@@ -56,11 +58,13 @@ class FileSyncHandler(FileSystemEventHandler):
                   directoryPath + ", skip file")
 
         print("[INFO] Create file done")
-        # ThunderSyncHandler.STATUS = 1
+        ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def __renameFile(src, dest):
-        # ThunderSyncHandler.STATUS = 2
+        from services.thundersynchandler import ThunderSyncHandler
+
+        ThunderSyncHandler.STATUS = 2
         print("[INFO] Rename file " + src + " to " + dest)
 
         remoteFile = FileSyncHandler.__getRemoteFile(src)
@@ -77,11 +81,13 @@ class FileSyncHandler(FileSystemEventHandler):
                 url=request_url, json=data, headers=headers)
 
         print("[INFO] Renamed file done.")
-        # ThunderSyncHandler.STATUS = 1
+        ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def deleteFile(src_path):
-        # ThunderSyncHandler.STATUS = 2
+        from services.thundersynchandler import ThunderSyncHandler
+
+        ThunderSyncHandler.STATUS = 2
         src_path = src_path.replace("\\", "/")
         print("[INFO] Delete file: " + src_path)
 
@@ -102,11 +108,13 @@ class FileSyncHandler(FileSystemEventHandler):
                   " not possible, not found on the server")
 
         print("[INFO] Delete file done")
-        # ThunderSyncHandler.STATUS = 1
+        ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def __modifyFile(src_path):
-        # ThunderSyncHandler.STATUS = 2
+        from services.thundersynchandler import ThunderSyncHandler
+
+        ThunderSyncHandler.STATUS = 2
         src_path = src_path.replace("\\", "/")
         print("[INFO] Modify file (delete and create): " + src_path)
 
@@ -117,7 +125,7 @@ class FileSyncHandler(FileSystemEventHandler):
         FileSyncHandler.createFile(src_path)
 
         print("[INFO] Modify file (delete and create) done")
-        # ThunderSyncHandler.STATUS = 1
+        ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def __getRemoteFile(path):
