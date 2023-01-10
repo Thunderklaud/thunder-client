@@ -53,7 +53,7 @@ def uniqueFilePath(path):
 
 def removeBaseURL(path, isFile):
     syncDirectoryPath = LocalAppManager.getSetting(
-        "localSyncFolderPath")
+        "syncFolderPath")
     localPathLength = len(syncDirectoryPath)
     pathLength = len(path)
     path = path[localPathLength:pathLength]
