@@ -23,7 +23,9 @@ class DirectorySyncHandler(FileSystemEventHandler):
 
     @staticmethod
     def __createDirectory(src):
-        # ThunderSyncHandler.STATUS = 2
+        from services.thundersynchandler import ThunderSyncHandler
+
+        ThunderSyncHandler.STATUS = 2
         print("[INFO] Create directory " + src)
 
         directoryName = getDirectoryOrFileName(src)
@@ -46,11 +48,13 @@ class DirectorySyncHandler(FileSystemEventHandler):
             url=request_url, json=data, headers=headers)
 
         print("[INFO] Create directory done")
-        # ThunderSyncHandler.STATUS = 1
+        ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def __moveDirectory(src, dest):
-        # ThunderSyncHandler.STATUS = 2
+        from services.thundersynchandler import ThunderSyncHandler
+
+        ThunderSyncHandler.STATUS = 2
         print("[INFO] Move/Rename directory from " + src + " to " + dest)
         remoteDirectory = DirectorySyncHandler.__getRemoteDirectory(src)
 
@@ -77,11 +81,13 @@ class DirectorySyncHandler(FileSystemEventHandler):
                     url=request_url, json=data, headers=headers)
 
         print("[INFO] Move/Rename directory done")
-        # ThunderSyncHandler.STATUS = 1
+        ThunderSyncHandler.STATUS = 1
 
     @staticmethod
     def deleteDirectory(src_path):
-        # ThunderSyncHandler.STATUS = 2
+        from services.thundersynchandler import ThunderSyncHandler
+
+        ThunderSyncHandler.STATUS = 2
         src_path = src_path.replace("\\", "/")
         print("[INFO] Delete directory: " + src_path)
 
@@ -99,7 +105,7 @@ class DirectorySyncHandler(FileSystemEventHandler):
                   " not possible. Directory not found on server")
 
         print("[INFO] Delete directory done")
-        # ThunderSyncHandler.STATUS = 1
+        ThunderSyncHandler.STATUS = 1
 
     # same as __getRemoteDirectory() in FileSyncHandler
     @staticmethod
