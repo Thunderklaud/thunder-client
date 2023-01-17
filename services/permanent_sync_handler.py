@@ -14,7 +14,8 @@ from services.sync_handlers.filesynchandler import FileSyncHandler
 
 class PermanentSyncHandler:
 
-    RUNNING = True
+    # global variable to set the observers state (0 = offline, 1 = running, 2 = syncing)
+    STATUS = 1
 
     def __init__(self):
         self.syncDirectoryPath = LocalAppManager.getSetting(
@@ -31,10 +32,12 @@ class PermanentSyncHandler:
         print("[INFO] Starting permanent syncronisation...")
 
         try:
-            while PermanentSyncHandler.RUNNING == True:
+            while PermanentSyncHandler.STATUS != 0:
                 time.sleep(5)
                 # self.doRemoteCheck()
-                self.runStartup()   # Fallback for sync
+
+                if PermanentSyncHandler.STATUS == 1:
+                    self.runStartup()   # Fallback for sync
         except:
             print("PermanentSyncHandler error")
 
@@ -74,6 +77,7 @@ class PermanentSyncHandler:
         return int(time.time()*1000.0)
 
     def runStartup(self):
+        PermanentSyncHandler.STATUS = 2
         print("[INFO] Sync local folder '" +
               self.syncDirectoryPath + "' with remote server...")
 
@@ -95,6 +99,7 @@ class PermanentSyncHandler:
         print("[INFO] Sync local folder done")
 
         # self.run()    # TODO: incomment when using doRemoteCheck()
+        PermanentSyncHandler.STATUS = 1
 
     @staticmethod
     def __downloadRemoteContentRecursive(self, parent_id=None, path="", directoriesNotToSync=[]):
