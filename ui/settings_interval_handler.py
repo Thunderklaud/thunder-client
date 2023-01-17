@@ -9,6 +9,7 @@ class SettingsIntervalHandler:
 
     def run(self, statusBadge):
         self.statusBadge = statusBadge
+        self.i = 1
         t1 = threading.Thread(target=self.start)
         t1.start()
 
@@ -20,9 +21,10 @@ class SettingsIntervalHandler:
                 if ThunderSyncHandler.STATUS == 0:
                     status = "offline"
                 if ThunderSyncHandler.STATUS == 1:
-                    status = "waiting for changes"
+                    status = "waiting for changes..."
                 if ThunderSyncHandler.STATUS == 2:
-                    status = "syncing"
+                    status = "syncing..."
+
                 self.statusBadge.setText("Status: " + status)
                 time.sleep(1)
         except:

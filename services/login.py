@@ -3,12 +3,12 @@ from hashlib import sha256
 from services.localappmanager import LocalAppManager
 from ui.settings_interval_handler import SettingsIntervalHandler
 from services.thundersynchandler import ThunderSyncHandler
-from services.startup_syncer import StartupSyncer
+from services.permanent_sync_handler import PermanentSyncHandler
 from utils.request import getRequestHeaders, getRequestURL
 
 
 def isLoggedIn():
-    
+
     if LocalAppManager.getSetting("serverURL") == "":
         return False
 
@@ -32,8 +32,8 @@ def login(email, password, serverURL, openSetingsScreen):
     pwHash = hashPassword(password)
 
     # save ServerURL
-    LocalAppManager.saveSetting("serverURL", serverURL);
-    
+    LocalAppManager.saveSetting("serverURL", serverURL)
+
     requestURL = getRequestURL("/user/login")
     loginData = {"email": email, "pw_hash": pwHash}
     response = requests.post(url=requestURL, json=loginData)
@@ -41,7 +41,6 @@ def login(email, password, serverURL, openSetingsScreen):
     # handle server error response
     if response.status_code != 200:
         return "Login failed: " + response.text
-
 
     jsonResponse = response.json()
 
@@ -64,6 +63,7 @@ def logout(openLoginScreen):
     if response.status_code == 200:
         ThunderSyncHandler.STATUS = 0
         SettingsIntervalHandler.RUNNING = False
+        PermanentSyncHandler.STATUS = 0
         LocalAppManager.removeJWTLocally()
         openLoginScreen()
         return True
@@ -77,8 +77,8 @@ def hashPassword(string):
 
 def doAfterLoginActions():
     if isLoggedIn():
-        startupSyncer = StartupSyncer()
-        startupSyncer.start()
+        permanentSyncHandler = PermanentSyncHandler()
+        permanentSyncHandler.runStartup()
 
         sync_handler = ThunderSyncHandler()
         sync_handler.run()
