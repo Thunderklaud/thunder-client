@@ -33,8 +33,6 @@ class DirectorySyncHandler(FileSystemEventHandler):
 
         remoteDirectory = DirectorySyncHandler.__getRemoteDirectory(
             directoryPath)
-        print("remote dir: ")
-        print(remoteDirectory)
 
         # set parent id empty or get parent id if sub folder
         parentId = ""
@@ -88,7 +86,7 @@ class DirectorySyncHandler(FileSystemEventHandler):
         from services.thundersynchandler import ThunderSyncHandler
 
         ThunderSyncHandler.STATUS = 2
-        src_path = src_path.replace("\\", "/")
+        src_path = uniqueDirectoryPath(src_path)
         print("[INFO] Delete directory: " + src_path)
 
         remoteDirectory = DirectorySyncHandler.__getRemoteDirectory(src_path)
