@@ -51,7 +51,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.infoBoxLayout = QtWidgets.QVBoxLayout()
         infoBox.setLayout(self.infoBoxLayout)
 
-        # ServerURL
+        # add ServerURL
         urlString = "Server URL: " + LocalAppManager.getSetting("serverURL")
         serverURLLabel = QtWidgets.QLabel(urlString)
         font = serverURLLabel.font()
@@ -59,9 +59,8 @@ class SettingsUI(QtWidgets.QWidget):
         serverURLLabel.setFont(font)
         self.infoBoxLayout.addWidget(serverURLLabel)
 
-        #
+        # add Status Badge with async Handler
         statusBadge = QtWidgets.QLabel("Status: unknown")
-
         settingsIntervalHandler = SettingsIntervalHandler()
         settingsIntervalHandler.run(statusBadge)
         self.infoBoxLayout.addWidget(statusBadge)
