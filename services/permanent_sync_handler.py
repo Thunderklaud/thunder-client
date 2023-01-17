@@ -21,7 +21,6 @@ class PermanentSyncHandler:
         self.syncDirectoryPath = LocalAppManager.getSetting(
             "syncFolderPath")
         self.lastCheck = self.getTimestamp()
-
         self.run()
 
     def run(self):
@@ -31,10 +30,11 @@ class PermanentSyncHandler:
     def start(self):
         print("[INFO] Starting permanent syncronisation...")
 
+        # self.runStartup()
+
         try:
             while PermanentSyncHandler.STATUS != 0:
                 time.sleep(5)
-                # self.doRemoteCheck()
 
                 if PermanentSyncHandler.STATUS == 1:
                     self.runStartup()   # Fallback for sync
@@ -98,8 +98,10 @@ class PermanentSyncHandler:
 
         print("[INFO] Sync local folder done")
 
-        # self.run()    # TODO: incomment when using doRemoteCheck()
         PermanentSyncHandler.STATUS = 1
+        # self.run()    # TODO: incomment when using doRemoteCheck()
+        # if PermanentSyncHandler.STATUS == 2:
+        #     self.run()
 
     @staticmethod
     def __downloadRemoteContentRecursive(self, parent_id=None, path="", directoriesNotToSync=[]):
