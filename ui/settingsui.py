@@ -105,23 +105,21 @@ class SettingsUI(QtWidgets.QWidget):
         self.contentLayout.addWidget(syncDirectoriesBox)
 
     def addSyncDirectories(self):
-        self.refresh_button.setText("Loading...")
-
         # remove all directories checkboxes
         count = self.syncDirectoriesLayout.count()
-        for i in range(1, count):
+        
+        for i in range(2, count):
             item = self.syncDirectoriesLayout.itemAt(1).widget()
             item.setParent(None)
 
         syncDirectories = ServerSettings.getSyncDirectories()
         self.addSyncDirectoryRecursive(syncDirectories)
-        self.refresh_button.setText("↻")
 
     def addSyncDirectoryRecursive(self, directory, level=0):
         perLevelPadding = 7
 
         for dir in directory:
-            checkboxLabel = dir["name"]
+            checkboxLabel = dir["name"] + " (Files: " + str(dir["childCount"]) + ")"
 
             checkbox = QtWidgets.QCheckBox(checkboxLabel, self)
             checkbox.setObjectName(dir["id"])
