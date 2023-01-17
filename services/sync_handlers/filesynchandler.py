@@ -39,6 +39,7 @@ class FileSyncHandler(FileSystemEventHandler):
 
         if remoteDirectory:
             try:
+                src = uniqueFilePath(src)
                 fileHandle = open(src, "rb")
                 files = {"file": fileHandle}
 
@@ -88,7 +89,7 @@ class FileSyncHandler(FileSystemEventHandler):
         from services.thundersynchandler import ThunderSyncHandler
 
         ThunderSyncHandler.STATUS = 2
-        src_path = src_path.replace("\\", "/")
+        src_path = uniqueFilePath(src_path)
         print("[INFO] Delete file: " + src_path)
 
         remoteFile = FileSyncHandler.__getRemoteFile(src_path)
@@ -146,7 +147,7 @@ class FileSyncHandler(FileSystemEventHandler):
 
         # search for sync directory by path
         syncDirectories = ServerSettings.getSyncDirectories(False, True)
-        print(syncDirectories)
+        # print(syncDirectories)
 
         for syncDirectory in syncDirectories:
             if "path" in syncDirectory and syncDirectory["path"] == dir_path:

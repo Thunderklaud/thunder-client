@@ -63,7 +63,8 @@ class SyncHandlerHelper(FileSystemEventHandler):
         ThunderSyncHandler.STATUS = 2
 
         filePath = removeBaseURL(event.src_path, True)
-        directoryPath = removeBaseURL(event.src_path, False)
+        directoryPath = uniqueDirectoryPath(
+            removeBaseURL(event.src_path, False))
         deleteType = 0  # 0 = undefined, 1 = file, 2 = directory
         remoteObject = {}
 
