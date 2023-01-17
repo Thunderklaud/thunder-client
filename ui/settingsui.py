@@ -108,7 +108,7 @@ class SettingsUI(QtWidgets.QWidget):
         # remove all directories checkboxes
         count = self.syncDirectoriesLayout.count()
         
-        for i in range(1, count):
+        for i in range(2, count):
             item = self.syncDirectoriesLayout.itemAt(1).widget()
             item.setParent(None)
 
