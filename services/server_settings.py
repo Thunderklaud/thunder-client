@@ -48,7 +48,6 @@ class ServerSettings():
             return []
         jsonResponse = response.json()
         dirs = jsonResponse["dirs"]
-        files = jsonResponse["files"]
 
         # loop the result
         for dir in dirs:
@@ -62,7 +61,7 @@ class ServerSettings():
             directory["id"] = directoryID
             directory["name"] = directoryName
             directory["path"] = childPath
-            directory["childCount"] = len(files)
+            directory["childCount"] = dir["child_file_count"]
 
             # set directory to sync/not to sync
             directory["syncDir"] = not directoryID in directoriesNotToSync
