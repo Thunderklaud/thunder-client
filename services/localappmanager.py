@@ -46,7 +46,8 @@ class LocalAppManager():
             return
 
         defaultServerURL = ""
-        defaultSyncFolderPath = "./test/client/"
+        defaultSyncFolderPath = str(Path.home()) + "/ThunderklaudSyncFolder"
+        # "./test/client/"
 
         settings = {}
 
