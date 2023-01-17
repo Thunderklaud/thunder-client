@@ -206,7 +206,7 @@ class SettingsUI(QtWidgets.QWidget):
 
     def clickedReSync(self):
         permanentSyncHandler = PermanentSyncHandler()
-        permanentSyncHandler.runStartup()
+        # permanentSyncHandler.runStartup()
 
     def showNotification(self, text):
         # remove old notifcation if exists

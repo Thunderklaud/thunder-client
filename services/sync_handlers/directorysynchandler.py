@@ -1,5 +1,8 @@
 import requests
+import os
+import shutil
 from watchdog.events import FileSystemEventHandler
+from services.permanent_sync_handler import PermanentSyncHandler
 from services.server_settings import ServerSettings
 from utils.request import getRequestURL, getRequestHeaders
 from utils.file import getDirectoryOrFileName, getDirectoryPath, uniqueDirectoryPath, removeBaseURL
@@ -77,17 +80,24 @@ class DirectorySyncHandler(FileSystemEventHandler):
                 data = {"id": remoteDirectory["id"], "name": directoryName}
                 requests.patch(
                     url=request_url, json=data, headers=headers)
+                #  PermanentSyncHandler.removeEntryFromLocalSyncState(
+                # remoteDirectory["id"])
 
         print("[INFO] Move/Rename directory done")
         ThunderSyncHandler.STATUS = 1
 
-    @staticmethod
+    @ staticmethod
     def deleteDirectory(src_path):
         from services.thundersynchandler import ThunderSyncHandler
 
         ThunderSyncHandler.STATUS = 2
         src_path = uniqueDirectoryPath(src_path)
         print("[INFO] Delete directory: " + src_path)
+
+        # remove dir if exists
+        if os.path.isdir(src_path):
+            print("DELETEEEE")
+            shutil.rmtree(src_path)
 
         remoteDirectory = DirectorySyncHandler.__getRemoteDirectory(src_path)
 
@@ -106,7 +116,7 @@ class DirectorySyncHandler(FileSystemEventHandler):
         ThunderSyncHandler.STATUS = 1
 
     # same as __getRemoteDirectory() in FileSyncHandler
-    @staticmethod
+    @ staticmethod
     def __getRemoteDirectory(path):
         path = removeBaseURL(path, False)
 

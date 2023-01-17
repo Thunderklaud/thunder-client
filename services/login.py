@@ -78,7 +78,6 @@ def hashPassword(string):
 def doAfterLoginActions():
     if isLoggedIn():
         permanentSyncHandler = PermanentSyncHandler()
-        permanentSyncHandler.runStartup()
-
+        # permanentSyncHandler.runStartup()
         sync_handler = ThunderSyncHandler()
         sync_handler.run()

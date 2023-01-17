@@ -46,13 +46,15 @@ class LocalAppManager():
             return
 
         defaultServerURL = ""
-        defaultSyncFolderPath = "./test/client/"
+        defaultSyncFolderPath = str(Path.home()) + "/ThunderklaudSyncFolder"
+        lastSyncState = 0
 
         settings = {}
 
         settings["serverUrl"] = defaultServerURL
         settings["syncFolderPath"] = defaultSyncFolderPath
         settings["notToSyncFolders"] = []
+        settings["lastSyncState"] = lastSyncState
 
         settings = json.dumps(settings)
 
@@ -68,12 +70,6 @@ class LocalAppManager():
 
         if key in settings:
             return settings[key]
-
-        # if key == "server_url":
-        #    return "https://thunderklaud-api.web2ju.de/"
-
-        # if key == "local_sync_folder_path":
-        #     return "./test/client/"
         return ""
 
     # Saves one specific Setting
