@@ -36,7 +36,7 @@ class ThunderSyncHandler:
         self.observer.start()
         try:
             while ThunderSyncHandler.STATUS != 0:
-                time.sleep(3)
+                time.sleep(10)
         except:
             self.observer.stop()
             print("ThunderSyncHandler Observer error")
@@ -63,7 +63,8 @@ class SyncHandlerHelper(FileSystemEventHandler):
         ThunderSyncHandler.STATUS = 2
 
         filePath = removeBaseURL(event.src_path, True)
-        directoryPath = removeBaseURL(event.src_path, False)
+        directoryPath = uniqueDirectoryPath(
+            removeBaseURL(event.src_path, False))
         deleteType = 0  # 0 = undefined, 1 = file, 2 = directory
         remoteObject = {}
 

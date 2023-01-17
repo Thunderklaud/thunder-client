@@ -6,7 +6,7 @@ from ui.settings_interval_handler import SettingsIntervalHandler
 from services.localappmanager import LocalAppManager
 from services.login import logout
 from services.thundersynchandler import ThunderSyncHandler
-from services.startup_syncer import StartupSyncer
+from services.permanent_sync_handler import PermanentSyncHandler
 
 
 class SettingsUI(QtWidgets.QWidget):
@@ -51,7 +51,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.infoBoxLayout = QtWidgets.QVBoxLayout()
         infoBox.setLayout(self.infoBoxLayout)
 
-        # ServerURL
+        # add ServerURL
         urlString = "Server URL: " + LocalAppManager.getSetting("serverURL")
         serverURLLabel = QtWidgets.QLabel(urlString)
         font = serverURLLabel.font()
@@ -59,9 +59,8 @@ class SettingsUI(QtWidgets.QWidget):
         serverURLLabel.setFont(font)
         self.infoBoxLayout.addWidget(serverURLLabel)
 
-        #
+        # add Status Badge with async Handler
         statusBadge = QtWidgets.QLabel("Status: unknown")
-
         settingsIntervalHandler = SettingsIntervalHandler()
         settingsIntervalHandler.run(statusBadge)
         self.infoBoxLayout.addWidget(statusBadge)
@@ -147,7 +146,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-        aboutLine2 = QtWidgets.QLabel("Version 1.1.3")
+        aboutLine2 = QtWidgets.QLabel("Version 1.1.5")
         self.aboutBoxLayout.addWidget(aboutLine2)
 
         aboutLine3 = QtWidgets.QLabel(
@@ -207,8 +206,8 @@ class SettingsUI(QtWidgets.QWidget):
             self.showNotification("Error: Logout not possible!")
 
     def clickedReSync(self):
-        startupSyncer = StartupSyncer()
-        startupSyncer.start()
+        permanentSyncHandler = PermanentSyncHandler()
+        permanentSyncHandler.runStartup()
 
     def showNotification(self, text):
         # remove old notifcation if exists
@@ -231,4 +230,5 @@ class SettingsUI(QtWidgets.QWidget):
 
     def closeEvent(self, event):
         ThunderSyncHandler.STATUS = 0
+        PermanentSyncHandler.STATUS = 0
         SettingsIntervalHandler.RUNNING = False
