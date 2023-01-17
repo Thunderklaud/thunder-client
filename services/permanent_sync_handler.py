@@ -1,6 +1,8 @@
 import shutil
 import os
+import time
 import io
+import threading
 from glob import iglob
 from services.localappmanager import LocalAppManager
 import requests
@@ -10,11 +12,68 @@ from utils.request import getRequestURL, getRequestHeaders
 from services.sync_handlers.filesynchandler import FileSyncHandler
 
 
-class StartupSyncer:
+class PermanentSyncHandler:
 
-    def start(self):
+    RUNNING = True
+
+    def __init__(self):
         self.syncDirectoryPath = LocalAppManager.getSetting(
             "syncFolderPath")
+        self.lastCheck = self.getTimestamp()
+
+        self.run()
+
+    def run(self):
+        t1 = threading.Thread(target=self.start)
+        t1.start()
+
+    def start(self):
+        print("[INFO] Starting permanent syncronisation...")
+
+        try:
+            while PermanentSyncHandler.RUNNING == True:
+                time.sleep(5)
+                # self.doRemoteCheck()
+                self.runStartup()   # Fallback for sync
+        except:
+            print("PermanentSyncHandler error")
+
+    # TODO: IN PRODUCTION
+    def doRemoteCheck(self):
+        # do server request
+        request_url = getRequestURL("/user/syncstate")
+        request_url += "?since=" + str(self.lastCheck)
+        headers = getRequestHeaders()
+
+        # build request data
+        response = requests.get(url=request_url, json={}, headers=headers)
+        changes = response.json()
+
+        for change in changes:
+            # CREATE
+            if change["type"] == "File" and change["action"] == "create":
+                print("PermanentSyncHandler: Create File")
+            if change["type"] == "Directory" and change["action"] == "create":
+                print("PermanentSyncHandler: Create Directory")
+
+            # RENAME
+            if change["type"] == "File" and change["action"] == "rename":
+                print("PermanentSyncHandler: Rename File")
+            if change["type"] == "Directory" and change["action"] == "rename":
+                print("PermanentSyncHandler: Rename Directory")
+
+            # DELETE
+            if change["type"] == "File" and change["action"] == "delete":
+                print("PermanentSyncHandler: Delete File")
+            if change["type"] == "Directory" and change["action"] == "delete":
+                print("PermanentSyncHandler: Delete Directory")
+
+        self.lastCheck = self.getTimestamp()
+
+    def getTimestamp(self):
+        return int(time.time()*1000.0)
+
+    def runStartup(self):
         print("[INFO] Sync local folder '" +
               self.syncDirectoryPath + "' with remote server...")
 
@@ -26,14 +85,16 @@ class StartupSyncer:
         directoriesNotToSync = LocalAppManager.getSetting("notToSyncFolders")
 
         # create local directories
-        self.remoteFilesAndDirectories = StartupSyncer.__downloadRemoteContentRecursive(
+        self.remoteFilesAndDirectories = PermanentSyncHandler.__downloadRemoteContentRecursive(
             self, None, "", directoriesNotToSync)
 
         # delete local directories that does not exists on the server
-        StartupSyncer.__deleteFilesAndDirectoriessNotOnServer(
+        PermanentSyncHandler.__deleteFilesAndDirectoriessNotOnServer(
             self, directoriesNotToSync)
 
         print("[INFO] Sync local folder done")
+
+        # self.run()    # TODO: incomment when using doRemoteCheck()
 
     @staticmethod
     def __downloadRemoteContentRecursive(self, parent_id=None, path="", directoriesNotToSync=[]):
@@ -58,7 +119,8 @@ class StartupSyncer:
         # download files
         if len(files):
             for file in files:
-                fileResult = StartupSyncer.__handleFile(self, file, path)
+                fileResult = PermanentSyncHandler.__handleFile(
+                    self, file, path)
                 result.append(fileResult)
 
         # loop dirs
@@ -83,8 +145,8 @@ class StartupSyncer:
 
             # only get children if folder should be synced
             if not directoryID in directoriesNotToSync:
-                result += StartupSyncer.__downloadRemoteContentRecursive(self,
-                                                                         directoryID, childPath, directoriesNotToSync)
+                result += PermanentSyncHandler.__downloadRemoteContentRecursive(self,
+                                                                                directoryID, childPath, directoriesNotToSync)
 
             result.append(directory)
 
@@ -106,7 +168,7 @@ class StartupSyncer:
 
         # if local file does not exists => download
         if not os.path.isfile(filePath):
-            StartupSyncer.__downloadFile(fileID, filePath)
+            PermanentSyncHandler.__downloadFile(fileID, filePath)
 
         else:   # check dates for newer file
 
@@ -117,7 +179,7 @@ class StartupSyncer:
 
             # if remote modified date is newer => download file, else upload file
             if remoteModifiedDate > localModifiedDate:
-                StartupSyncer.__downloadFile(fileID, filePath)
+                PermanentSyncHandler.__downloadFile(fileID, filePath)
             else:
                 FileSyncHandler.createFile(filePath)
 

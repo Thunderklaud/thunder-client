@@ -6,7 +6,7 @@ from ui.settings_interval_handler import SettingsIntervalHandler
 from services.localappmanager import LocalAppManager
 from services.login import logout
 from services.thundersynchandler import ThunderSyncHandler
-from services.startup_syncer import StartupSyncer
+from services.permanent_sync_handler import PermanentSyncHandler
 
 
 class SettingsUI(QtWidgets.QWidget):
@@ -206,8 +206,8 @@ class SettingsUI(QtWidgets.QWidget):
             self.showNotification("Error: Logout not possible!")
 
     def clickedReSync(self):
-        startupSyncer = StartupSyncer()
-        startupSyncer.start()
+        permanentSyncHandler = PermanentSyncHandler()
+        permanentSyncHandler.runStartup()
 
     def showNotification(self, text):
         # remove old notifcation if exists
@@ -230,4 +230,5 @@ class SettingsUI(QtWidgets.QWidget):
 
     def closeEvent(self, event):
         ThunderSyncHandler.STATUS = 0
+        PermanentSyncHandler.RUNNING = False
         SettingsIntervalHandler.RUNNING = False

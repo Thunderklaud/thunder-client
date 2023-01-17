@@ -50,7 +50,7 @@ def uniqueFilePath(path):
         path = "/" + path
 
     # remove slash when drive
-    if beginningSlash and path[2] == ":":
+    if path[0] == "/" and len(path) > 2 and path[2] == ":":
         path = path[1:]
 
     path = path.replace("//", "/")
