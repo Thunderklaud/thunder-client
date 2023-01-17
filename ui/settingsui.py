@@ -107,9 +107,9 @@ class SettingsUI(QtWidgets.QWidget):
     def addSyncDirectories(self):
         # remove all directories checkboxes
         count = self.syncDirectoriesLayout.count()
-        
+
         for i in range(2, count):
-            item = self.syncDirectoriesLayout.itemAt(1).widget()
+            item = self.syncDirectoriesLayout.itemAt(2).widget()
             item.setParent(None)
 
         syncDirectories = ServerSettings.getSyncDirectories()
@@ -119,7 +119,8 @@ class SettingsUI(QtWidgets.QWidget):
         perLevelPadding = 7
 
         for dir in directory:
-            checkboxLabel = dir["name"] + " (Files: " + str(dir["childCount"]) + ")"
+            checkboxLabel = dir["name"] + \
+                " (Files: " + str(dir["childCount"]) + ")"
 
             checkbox = QtWidgets.QCheckBox(checkboxLabel, self)
             checkbox.setObjectName(dir["id"])

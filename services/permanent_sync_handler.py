@@ -34,7 +34,7 @@ class PermanentSyncHandler:
 
         try:
             while PermanentSyncHandler.STATUS != 0:
-                time.sleep(5)
+                time.sleep(10)
 
                 if PermanentSyncHandler.STATUS == 1:
                     self.runStartup()   # Fallback for sync
