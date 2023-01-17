@@ -146,7 +146,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-        aboutLine2 = QtWidgets.QLabel("Version 1.1.3")
+        aboutLine2 = QtWidgets.QLabel("Version 1.1.5")
         self.aboutBoxLayout.addWidget(aboutLine2)
 
         aboutLine3 = QtWidgets.QLabel(
