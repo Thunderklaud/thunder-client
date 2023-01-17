@@ -230,5 +230,5 @@ class SettingsUI(QtWidgets.QWidget):
 
     def closeEvent(self, event):
         ThunderSyncHandler.STATUS = 0
-        PermanentSyncHandler.RUNNING = False
+        PermanentSyncHandler.STATUS = 0
         SettingsIntervalHandler.RUNNING = False

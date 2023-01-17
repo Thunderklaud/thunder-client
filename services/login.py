@@ -63,7 +63,7 @@ def logout(openLoginScreen):
     if response.status_code == 200:
         ThunderSyncHandler.STATUS = 0
         SettingsIntervalHandler.RUNNING = False
-        PermanentSyncHandler.RUNNING = False
+        PermanentSyncHandler.STATUS = 0
         LocalAppManager.removeJWTLocally()
         openLoginScreen()
         return True
