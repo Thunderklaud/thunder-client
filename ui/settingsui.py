@@ -146,7 +146,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-        aboutLine2 = QtWidgets.QLabel("Version 1.1.5")
+        aboutLine2 = QtWidgets.QLabel("Version 1.2.0")
         self.aboutBoxLayout.addWidget(aboutLine2)
 
         aboutLine3 = QtWidgets.QLabel(
@@ -186,7 +186,7 @@ class SettingsUI(QtWidgets.QWidget):
         rowLayout.addWidget(syncMode)
         rowLayout.addWidget(self.comboBox)
         self.settingsBoxLayout.addLayout(rowLayout)
-        
+
     def getSyncMode(self):
         return self.comboBox.currentText()
 
