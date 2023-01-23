@@ -64,6 +64,7 @@ class FileSyncHandler(FileSystemEventHandler):
     @staticmethod
     def __renameFile(src, dest):
         from services.thundersynchandler import ThunderSyncHandler
+        from services.permanent_sync_handler import PermanentSyncHandler
 
         ThunderSyncHandler.STATUS = 2
         print("[INFO] Rename file " + src + " to " + dest)
@@ -114,10 +115,18 @@ class FileSyncHandler(FileSystemEventHandler):
     @staticmethod
     def __modifyFile(src_path):
         from services.thundersynchandler import ThunderSyncHandler
+        from services.permanent_sync_handler import PermanentSyncHandler
 
         ThunderSyncHandler.STATUS = 2
         src_path = src_path.replace("\\", "/")
         print("[INFO] Modify file (delete and create): " + src_path)
+
+        toCheckSrcPath = removeBaseURL(src_path, True)
+        if toCheckSrcPath in PermanentSyncHandler.SYNCED_PATHS:
+            PermanentSyncHandler.SYNCED_PATHS.remove(toCheckSrcPath)
+            print("[INFO] Done, no action. Change came from PermanentSyncHandler.")
+            ThunderSyncHandler.STATUS = 1
+            return
 
         # delete old file
         FileSyncHandler.deleteFile(src_path)

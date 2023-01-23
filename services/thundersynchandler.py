@@ -47,6 +47,11 @@ class SyncHandlerHelper(FileSystemEventHandler):
     @staticmethod
     def on_any_event(event):
 
+        # mutex to prevent sync errors with PermanentSyncHandler
+        from services.permanent_sync_handler import PermanentSyncHandler
+        while PermanentSyncHandler.STATUS == 2:
+            time.sleep(3)
+
         # delete files and directories
         if event.event_type == "deleted":
             SyncHandlerHelper.__deleteFileOrDirectory(event)
