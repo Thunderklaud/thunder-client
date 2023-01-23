@@ -1,6 +1,7 @@
 import threading
 import time
 from services.thundersynchandler import ThunderSyncHandler
+from services.permanent_sync_handler import PermanentSyncHandler
 
 
 class SettingsIntervalHandler:
@@ -22,7 +23,7 @@ class SettingsIntervalHandler:
                     status = "offline"
                 if ThunderSyncHandler.STATUS == 1:
                     status = "waiting for changes..."
-                if ThunderSyncHandler.STATUS == 2:
+                if ThunderSyncHandler.STATUS == 2 or PermanentSyncHandler.STATUS == 2:
                     status = "syncing..."
 
                 self.statusBadge.setText("Status: " + status)

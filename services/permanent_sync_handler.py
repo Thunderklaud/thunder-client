@@ -9,13 +9,14 @@ import requests
 from config import Config
 from utils.file import uniqueDirectoryPath, uniqueFilePath, remoteFileOrDirectoryExists, removeBaseURL
 from utils.request import getRequestURL, getRequestHeaders
-from services.sync_handlers.filesynchandler import FileSyncHandler
+from services.thundersynchandler import ThunderSyncHandler
 
 
 class PermanentSyncHandler:
 
     # global variable to set the observers state (0 = offline, 1 = running, 2 = syncing)
     STATUS = 1
+    SYNCED_PATHS = []
 
     def __init__(self):
         self.syncDirectoryPath = LocalAppManager.getSetting(
@@ -30,13 +31,12 @@ class PermanentSyncHandler:
     def start(self):
         print("[INFO] Starting permanent syncronisation...")
 
-        # self.runStartup()
-
         try:
             while PermanentSyncHandler.STATUS != 0:
-                time.sleep(5)
+                time.sleep(10)  # every 10 seconds
 
-                if PermanentSyncHandler.STATUS == 1:
+                # mutex to prevent sync errors with watchdog
+                if PermanentSyncHandler.STATUS == 1 and ThunderSyncHandler.STATUS == 1:
                     self.runStartup()   # Fallback for sync
         except:
             print("PermanentSyncHandler error")
@@ -78,6 +78,7 @@ class PermanentSyncHandler:
 
     def runStartup(self):
         PermanentSyncHandler.STATUS = 2
+        SYNCED_PATHS = []
         print("[INFO] Sync local folder '" +
               self.syncDirectoryPath + "' with remote server...")
 
@@ -143,6 +144,8 @@ class PermanentSyncHandler:
             # only create folder if folder should be synced
             if not directoryID in directoriesNotToSync:
                 if not os.path.isdir(directoryPath):
+                    if not directoryPath in PermanentSyncHandler.SYNCED_PATHS:
+                        PermanentSyncHandler.SYNCED_PATHS.append(directoryPath)
                     os.makedirs(directoryPath)
 
             childPath = uniqueDirectoryPath(path + "/" + directoryName)
@@ -173,22 +176,25 @@ class PermanentSyncHandler:
         fileResult["name"] = fileName
         fileResult["path"] = uniqueFilePath(path + "/" + fileName)
 
+        if not fileResult["path"] in PermanentSyncHandler.SYNCED_PATHS:
+            PermanentSyncHandler.SYNCED_PATHS.append(fileResult["path"])
+
         # if local file does not exists => download
-        if not os.path.isfile(filePath):
-            PermanentSyncHandler.__downloadFile(fileID, filePath)
+        # if not os.path.isfile(filePath):
+        PermanentSyncHandler.__downloadFile(fileID, filePath)
 
-        else:   # check dates for newer file
+        # else:   # check dates for newer file
 
-            # compare modified dates
-            remoteModifiedDate = float(
-                file["creation_date"]["$date"]["$numberLong"]) / 1000  # * 1000 to get timestamp in seconds
-            localModifiedDate = float(os.path.getmtime(filePath))
+        # compare modified dates
+        # remoteModifiedDate = float(
+        #     file["creation_date"]["$date"]["$numberLong"]) / 1000  # * 1000 to get timestamp in seconds
+        # localModifiedDate = float(os.path.getmtime(filePath))
 
-            # if remote modified date is newer => download file, else upload file
-            if remoteModifiedDate > localModifiedDate:
-                PermanentSyncHandler.__downloadFile(fileID, filePath)
-            else:
-                FileSyncHandler.createFile(filePath)
+        # if remote modified date is newer => download file, else upload file
+        # if remoteModifiedDate > localModifiedDate:
+        #     PermanentSyncHandler.__downloadFile(fileID, filePath)
+        # else:
+        # FileSyncHandler.createFile(filePath)
 
         return fileResult
 

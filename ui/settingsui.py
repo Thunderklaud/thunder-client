@@ -105,23 +105,22 @@ class SettingsUI(QtWidgets.QWidget):
         self.contentLayout.addWidget(syncDirectoriesBox)
 
     def addSyncDirectories(self):
-        self.refresh_button.setText("Loading...")
-
         # remove all directories checkboxes
         count = self.syncDirectoriesLayout.count()
-        for i in range(1, count):
-            item = self.syncDirectoriesLayout.itemAt(1).widget()
+
+        for i in range(2, count):
+            item = self.syncDirectoriesLayout.itemAt(2).widget()
             item.setParent(None)
 
         syncDirectories = ServerSettings.getSyncDirectories()
         self.addSyncDirectoryRecursive(syncDirectories)
-        self.refresh_button.setText("↻")
 
     def addSyncDirectoryRecursive(self, directory, level=0):
         perLevelPadding = 7
 
         for dir in directory:
-            checkboxLabel = dir["name"]
+            checkboxLabel = dir["name"] + \
+                " (Files: " + str(dir["childCount"]) + ")"
 
             checkbox = QtWidgets.QCheckBox(checkboxLabel, self)
             checkbox.setObjectName(dir["id"])
@@ -139,6 +138,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.createLocalSyncPathInput()
         settingsBox.setLayout(self.settingsBoxLayout)
         self.contentLayout.addWidget(settingsBox)
+        self.createChangeMode()
 
     def createAboutArea(self):
         aboutBox = QtWidgets.QGroupBox("About")
@@ -146,7 +146,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         aboutLine1 = QtWidgets.QLabel("Thunderklaud Desktop-Client")
         self.aboutBoxLayout.addWidget(aboutLine1)
-        aboutLine2 = QtWidgets.QLabel("Version 1.1.5")
+        aboutLine2 = QtWidgets.QLabel("Version 1.2.0")
         self.aboutBoxLayout.addWidget(aboutLine2)
 
         aboutLine3 = QtWidgets.QLabel(
@@ -172,6 +172,24 @@ class SettingsUI(QtWidgets.QWidget):
 
         self.settingsBoxLayout.addLayout(rowLayout)
 
+    def createChangeMode(self):
+        rowLayout = QtWidgets.QHBoxLayout()
+
+        syncMode = QtWidgets.QLabel("Sync Mode")
+
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.comboBox.addItem("Server > Client")
+        self.comboBox.addItem("Client > Server")
+        self.comboBox.addItem("Bidirectional")
+        self.comboBox.setCurrentText(LocalAppManager.getSetting("syncMode"))
+
+        rowLayout.addWidget(syncMode)
+        rowLayout.addWidget(self.comboBox)
+        self.settingsBoxLayout.addLayout(rowLayout)
+
+    def getSyncMode(self):
+        return self.comboBox.currentText()
+
     def getLocalSyncPathInput(self):
         return self.localSyncPathInput.text()
 
@@ -187,6 +205,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         settings["syncFolderPath"] = self.getLocalSyncPathInput()
         settings["notToSyncFolders"] = self.getFoldersNotToSync()
+        settings["syncMode"] = self.getSyncMode()
 
         LocalAppManager.saveSettings(settings)
 
