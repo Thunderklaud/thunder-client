@@ -54,6 +54,7 @@ class LocalAppManager():
         settings["serverUrl"] = defaultServerURL
         settings["syncFolderPath"] = defaultSyncFolderPath
         settings["notToSyncFolders"] = []
+        settings["syncMode"] = "Server > Client"
 
         settings = json.dumps(settings)
 
