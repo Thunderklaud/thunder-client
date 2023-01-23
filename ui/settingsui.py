@@ -138,6 +138,7 @@ class SettingsUI(QtWidgets.QWidget):
         self.createLocalSyncPathInput()
         settingsBox.setLayout(self.settingsBoxLayout)
         self.contentLayout.addWidget(settingsBox)
+        self.createChangeMode()
 
     def createAboutArea(self):
         aboutBox = QtWidgets.QGroupBox("About")
@@ -171,6 +172,24 @@ class SettingsUI(QtWidgets.QWidget):
 
         self.settingsBoxLayout.addLayout(rowLayout)
 
+    def createChangeMode(self):
+        rowLayout = QtWidgets.QHBoxLayout()
+
+        syncMode = QtWidgets.QLabel("Sync Mode")
+
+        self.comboBox = QtWidgets.QComboBox(self)
+        self.comboBox.addItem("Server > Client")
+        self.comboBox.addItem("Client > Server")
+        self.comboBox.addItem("Bidirectional")
+        self.comboBox.setCurrentText(LocalAppManager.getSetting("syncMode"))
+
+        rowLayout.addWidget(syncMode)
+        rowLayout.addWidget(self.comboBox)
+        self.settingsBoxLayout.addLayout(rowLayout)
+        
+    def getSyncMode(self):
+        return self.comboBox.currentText()
+
     def getLocalSyncPathInput(self):
         return self.localSyncPathInput.text()
 
@@ -186,6 +205,7 @@ class SettingsUI(QtWidgets.QWidget):
 
         settings["syncFolderPath"] = self.getLocalSyncPathInput()
         settings["notToSyncFolders"] = self.getFoldersNotToSync()
+        settings["syncMode"] = self.getSyncMode()
 
         LocalAppManager.saveSettings(settings)
 
