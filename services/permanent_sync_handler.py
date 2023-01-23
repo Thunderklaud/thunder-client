@@ -34,7 +34,7 @@ class PermanentSyncHandler:
 
         try:
             while PermanentSyncHandler.STATUS != 0:
-                time.sleep(5)
+                time.sleep(10)
 
                 if PermanentSyncHandler.STATUS == 1:
                     self.runStartup()   # Fallback for sync
@@ -187,8 +187,8 @@ class PermanentSyncHandler:
             # if remote modified date is newer => download file, else upload file
             if remoteModifiedDate > localModifiedDate:
                 PermanentSyncHandler.__downloadFile(fileID, filePath)
-            else:
-                FileSyncHandler.createFile(filePath)
+            # else:
+                # FileSyncHandler.createFile(filePath)
 
         return fileResult
 

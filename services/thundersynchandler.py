@@ -36,7 +36,7 @@ class ThunderSyncHandler:
         self.observer.start()
         try:
             while ThunderSyncHandler.STATUS != 0:
-                time.sleep(3)
+                time.sleep(10)
         except:
             self.observer.stop()
             print("ThunderSyncHandler Observer error")
